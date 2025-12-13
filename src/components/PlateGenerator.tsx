@@ -237,6 +237,10 @@ export default function PlateGenerator() {
     if (!plateRef.current) return;
 
     try {
+      // Get actual DOM dimensions of the plate
+      const domWidth = plateRef.current.offsetWidth;
+      const domHeight = plateRef.current.offsetHeight;
+      
       // Use html-to-image to capture the element at high resolution
       const dataUrl = await htmlToImage.toPng(plateRef.current, {
         pixelRatio: 3, // Higher resolution for quality
@@ -249,10 +253,10 @@ export default function PlateGenerator() {
       // Load the image to resize it
       const img = new Image();
       img.onload = () => {
-        // Calculate export dimensions (420px width, proportional height 100-200px)
+        // Fixed width 420px, height based on actual DOM aspect ratio
+        const aspectRatio = domWidth / domHeight;
         const exportWidth = 420;
-        const aspectRatio = img.width / img.height;
-        const exportHeight = Math.min(200, Math.max(100, Math.round(exportWidth / aspectRatio)));
+        const exportHeight = Math.round(exportWidth / aspectRatio);
 
         // Create canvas at target size
         const canvas = document.createElement('canvas');
@@ -684,7 +688,7 @@ export default function PlateGenerator() {
             📥 {t.exportPNG}
           </button>
           <p className="mt-3 text-sm text-white/70">
-            Export: 420 × 100-200 px
+            Export: 420 × dynamisch px
           </p>
         </div>
       </div>
