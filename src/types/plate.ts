@@ -93,7 +93,7 @@ export interface PlateConfig {
   suffix: PlateSuffix;     // E for electric, H for historic
   showStatePlakette: boolean;
   showHUPlakette: boolean;
-  state: GermanState | AustrianState;  // State/Bundesland for Germany or Austria
+  state: GermanState | AustrianState | HungarianState | SlovakState;  // State/Bundesland for Germany, Austria, or national emblem for Hungary/Slovakia
   city: string;            // City name shown on state plakette
   huYear: number;          // Year for HU sticker
   huMonth: number;         // Month for HU sticker (1-12)
@@ -102,6 +102,9 @@ export interface PlateConfig {
 
 // Keep GermanPlateConfig for backward compatibility
 export type GermanPlateConfig = PlateConfig;
+
+export type HungarianState = 'HU';  // Hungary - only national coat of arms
+export type SlovakState = 'SK';     // Slovakia - only national coat of arms
 
 export type AustrianState =
   | 'W'   // Wien

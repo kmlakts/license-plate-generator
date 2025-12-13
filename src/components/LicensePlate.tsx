@@ -1,10 +1,12 @@
 'use client';
 
 import React, { forwardRef, useRef, useState, useLayoutEffect, useEffect } from 'react';
-import { GermanPlateConfig, PlateStyle } from '@/types/plate';
+import { GermanPlateConfig, PlateStyle, GermanState, AustrianState } from '@/types/plate';
 import EUBand from './EUBand';
 import StatePlakette from './StatePlakette';
 import AustrianStatePlakette from './AustrianStatePlakette';
+import HungarianCoatOfArms from './HungarianCoatOfArms';
+import SlovakCoatOfArms from './SlovakCoatOfArms';
 import HUPlakette from './HUPlakette';
 import BundeswehrPlakette from './BundeswehrPlakette';
 
@@ -88,7 +90,7 @@ function getCountryFeatures(country: string): {
 
 const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
   ({ config, scale = 1 }, ref) => {
-    const { cityCode, letters, numbers, suffix, showStatePlakette, showHUPlakette, state, city, huYear, huMonth, width, plateStyle, country, fontColor, backgroundColor, plateText, rightBandText, seasonalPlate, austrianState } = config;
+    const { cityCode, letters, numbers, suffix, showStatePlakette, showHUPlakette, state, city, huYear, huMonth, width, plateStyle, country, fontColor, backgroundColor, plateText, rightBandText, seasonalPlate } = config;
     
     const contentRef = useRef<HTMLDivElement>(null);
     const plateRef = useRef<HTMLDivElement>(null);
@@ -523,8 +525,8 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
                             }}>-</span>
                           )}
                           {/* State Plakette (bottom) */}
-                          {showStatePlakette && (
-                            <StatePlakette state={state} city={city} scale={scale * 0.95} isHovering={isHovering} tilt={tilt} />
+                          {showStatePlakette && country === 'D' && (
+                            <StatePlakette state={state as GermanState} city={city} scale={scale * 0.95} isHovering={isHovering} tilt={tilt} />
                           )}
                         </div>
                       )}
@@ -541,13 +543,45 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
                   <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{cityCode}</span>
                   
                   {/* Austrian Bundesland Plakette - plain emblem */}
-                  {showStatePlakette && (
+                  {showStatePlakette && country === 'A' && (
                     <div style={{ transformStyle: 'preserve-3d' }}>
-                      <AustrianStatePlakette state={state} scale={scale * 1.3} />
+                      <AustrianStatePlakette state={state as AustrianState} scale={scale * 1.3} />
                     </div>
                   )}
                   
                   {/* Free text for Austria */}
+                  <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{plateText || ''}</span>
+                </>
+              ) : country === 'H' ? (
+                /* Hungarian format with national coat of arms */
+                <>
+                  {/* City code */}
+                  <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{cityCode}</span>
+                  
+                  {/* Hungarian national coat of arms */}
+                  {showStatePlakette && (
+                    <div style={{ transformStyle: 'preserve-3d' }}>
+                      <HungarianCoatOfArms scale={scale * 1.3} />
+                    </div>
+                  )}
+                  
+                  {/* Free text for Hungary */}
+                  <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{plateText || ''}</span>
+                </>
+              ) : country === 'SK' ? (
+                /* Slovak format with national coat of arms */
+                <>
+                  {/* District code */}
+                  <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{cityCode}</span>
+                  
+                  {/* Slovak national coat of arms */}
+                  {showStatePlakette && (
+                    <div style={{ transformStyle: 'preserve-3d' }}>
+                      <SlovakCoatOfArms scale={scale * 1.3} />
+                    </div>
+                  )}
+                  
+                  {/* Free text for Slovakia */}
                   <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{plateText || ''}</span>
                 </>
               ) : (

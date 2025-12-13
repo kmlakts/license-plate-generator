@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { domToPng } from 'modern-screenshot';
-import { GermanPlateConfig, GermanState, STATE_NAMES, AustrianState, AUSTRIAN_STATE_NAMES, PlateWidth, PlateSuffix, PlateStyle, EUCountry } from '@/types/plate';
+import { GermanPlateConfig, GermanState, STATE_NAMES, AustrianState, AUSTRIAN_STATE_NAMES, HungarianState, SlovakState, PlateWidth, PlateSuffix, PlateStyle, EUCountry } from '@/types/plate';
 import LicensePlate from './LicensePlate';
 import { useTranslation, Language, LANGUAGE_NAMES, LANGUAGE_FLAGS, SUPPORTED_LANGUAGES } from '@/i18n';
 
@@ -100,7 +100,7 @@ const DEFAULT_CONFIG: GermanPlateConfig = {
   showHUPlakette: true,
   state: 'NW',
   city: 'Landeshauptstadt Düsseldorf',
-  huYear: 2027,
+  huYear: CURRENT_YEAR + 2,
   huMonth: 7,
   width: 'standard',
   plateStyle: 'normal',
@@ -396,7 +396,7 @@ export default function PlateGenerator() {
                     backgroundColor: countryDefaults.backgroundColor,
                     rightBandText: countryDefaults.rightBandText,
                     // Reset state to appropriate default when switching countries
-                    state: newCountry === 'A' ? 'W' : 'BY',
+                    state: newCountry === 'A' ? 'W' : newCountry === 'H' ? 'HU' : newCountry === 'SK' ? 'SK' : 'BY',
                   }));
                   setShowGermanOptions(newCountry === 'D');
                   setShowAustrianOptions(newCountry === 'A');
@@ -411,8 +411,8 @@ export default function PlateGenerator() {
               </select>
             </div>
 
-            {/* Plate Text - for non-German and non-Austrian plates */}
-            {config.country !== 'D' && config.country !== 'A' && (
+            {/* Plate Text - for countries without coat of arms */}
+            {!['D', 'A', 'H', 'SK'].includes(config.country) && (
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.plateText}
@@ -510,6 +510,70 @@ export default function PlateGenerator() {
                   placeholder="AB12345"
                 />
               </div>
+            )}
+
+            {/* Hungarian plate inputs - City code + Free text */}
+            {config.country === 'H' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                    Stadtkennzeichen
+                  </label>
+                  <input
+                    type="text"
+                    value={config.cityCode}
+                    onChange={(e) => handleChange('cityCode', e.target.value.toUpperCase().slice(0, 3))}
+                    className="modern-input"
+                    maxLength={3}
+                    placeholder="BP, DE..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                    Buchstaben- und Zahlenkombination
+                  </label>
+                  <input
+                    type="text"
+                    value={config.plateText}
+                    onChange={(e) => handleChange('plateText', e.target.value.toUpperCase().slice(0, 7))}
+                    className="modern-input"
+                    maxLength={7}
+                    placeholder="ABC123"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Slovak plate inputs - City code + Free text */}
+            {config.country === 'SK' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                    Bezirkskennzeichen
+                  </label>
+                  <input
+                    type="text"
+                    value={config.cityCode}
+                    onChange={(e) => handleChange('cityCode', e.target.value.toUpperCase().slice(0, 2))}
+                    className="modern-input"
+                    maxLength={2}
+                    placeholder="BA, KE..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                    Buchstaben- und Zahlenkombination
+                  </label>
+                  <input
+                    type="text"
+                    value={config.plateText}
+                    onChange={(e) => handleChange('plateText', e.target.value.toUpperCase().slice(0, 7))}
+                    className="modern-input"
+                    maxLength={7}
+                    placeholder="ABC123"
+                  />
+                </div>
+              </>
             )}
 
             {/* Numbers input - only for German plates */}
@@ -687,7 +751,7 @@ export default function PlateGenerator() {
                       onChange={(e) => handleChange('huYear', parseInt(e.target.value))}
                       className="modern-select"
                     >
-                      {Array.from({ length: 10 }, (_, i) => CURRENT_YEAR + i).map((year) => (
+                      {Array.from({ length: 21 }, (_, i) => CURRENT_YEAR - 10 + i).map((year) => (
                         <option key={year} value={year}>
                           {year}
                         </option>
