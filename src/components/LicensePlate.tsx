@@ -5,6 +5,7 @@ import { GermanPlateConfig, PlateStyle } from '@/types/plate';
 import EUBand from './EUBand';
 import StatePlakette from './StatePlakette';
 import HUPlakette from './HUPlakette';
+import BundeswehrPlakette from './BundeswehrPlakette';
 
 interface LicensePlateProps {
   config: GermanPlateConfig;
@@ -103,8 +104,8 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
       const y = e.clientY - rect.top;
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * -15; // Max 15 degrees
-      const rotateY = ((x - centerX) / centerX) * 15; // Max 15 degrees
+      const rotateX = ((y - centerY) / centerY) * -15; // Max 15 degrees for subtler parallax
+      const rotateY = ((x - centerX) / centerX) * 15; // Max 15 degrees for subtler parallax
       setTilt({ rotateX, rotateY });
     };
 
@@ -250,7 +251,7 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
       <div
         ref={ref}
         style={{
-          perspective: '1000px',
+          perspective: '1500px',
           display: 'inline-block',
           flexShrink: 0,
           flexGrow: 0,
@@ -266,12 +267,20 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
             padding: `${whiteBorderWidth}px`,
             backgroundColor: styles.is3D ? 'transparent' : '#fff',
             borderRadius: `${10 * scale}px`,
-            transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
-            transition: isHovering ? 'transform 0.1s ease-out' : 'transform 0.4s ease-out',
+            transform: `
+              rotateX(${tilt.rotateX}deg) 
+              rotateY(${tilt.rotateY}deg)
+              translateZ(${isHovering ? 30 * scale : 0}px)
+            `,
+            transition: isHovering ? 'transform 0.15s ease-out' : 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
             transformStyle: 'preserve-3d',
             boxShadow: isHovering 
-              ? `${-tilt.rotateY * 2}px ${tilt.rotateX * 2}px ${20 * scale}px rgba(0,0,0,0.3)`
-              : 'none',
+              ? `
+                ${-tilt.rotateY * 3}px ${tilt.rotateX * 3}px ${30 * scale}px rgba(0,0,0,0.4),
+                ${-tilt.rotateY * 1.5}px ${tilt.rotateX * 1.5}px ${15 * scale}px rgba(0,0,0,0.2),
+                ${-tilt.rotateY * 0.5}px ${tilt.rotateX * 0.5}px ${5 * scale}px rgba(0,0,0,0.15)
+              `
+              : `0px 4px 8px rgba(0,0,0,0.1)`,
           }}
         >
           <div
@@ -284,8 +293,8 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
               backgroundColor: plateBgColor,
               border: `${borderWidth}px solid ${styles.borderColor}`,
               borderRadius: `${8 * scale}px`,
-              overflow: 'hidden',
               fontFamily: 'EuroPlate, sans-serif',
+              transformStyle: 'preserve-3d',
               boxShadow: styles.is3D 
                 ? `inset ${2 * scale}px ${2 * scale}px ${4 * scale}px rgba(255,255,255,0.5), inset ${-1 * scale}px ${-1 * scale}px ${3 * scale}px rgba(0,0,0,0.15)` 
                 : 'none',
@@ -327,7 +336,7 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: `${8 * scale}px ${4 * scale}px`,
+              padding: `${15 * scale}px ${4 * scale}px`,
             }}>
               <div style={{
                 width: '100%',
@@ -384,7 +393,7 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
               alignItems: 'center',
               justifyContent: 'center',
               padding: `0 ${padding}px`,
-              overflow: 'hidden',
+              transformStyle: 'preserve-3d',
             }}
           >
             {/* Scalable content wrapper */}
@@ -396,17 +405,24 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
                 gap: `${16 * scale}px`,
                 transform: compressionRatio < 1 ? `scaleX(${compressionRatio})` : undefined,
                 transformOrigin: 'center',
+                transformStyle: 'preserve-3d',
               }}
             >
               {isGermany ? (
                 <>
                   {cityCode === 'Y' ? (
-                    /* Military format: Y-123456 */
-                    <span style={textStyle}>{cityCode}-{numbers}</span>
+                    /* Military format: Y-123456 with Bundeswehr plakette */
+                    <>
+                      <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{cityCode}</span>
+                      <div style={{ transformStyle: 'preserve-3d' }}>
+                        <BundeswehrPlakette scale={scale * 0.95} isHovering={isHovering} tilt={tilt} />
+                      </div>
+                      <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{numbers}</span>
+                    </>
                   ) : (
                     <>
                       {/* City code */}
-                      <span style={textStyle}>{cityCode}</span>
+                      <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{cityCode}</span>
                       
                       {/* Plaketten - counter-scale to maintain aspect ratio */}
                       {(showStatePlakette || showHUPlakette) && (
@@ -418,6 +434,7 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
                             gap: `${4 * scale}px`,
                             flexShrink: 0,
                             transform: compressionRatio < 1 ? `scaleX(${1 / compressionRatio})` : undefined,
+                            transformStyle: 'preserve-3d',
                           }}
                         >
                           {/* HU Plakette (top) - use visibility to keep space */}
@@ -426,18 +443,18 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
                           </div>
                           {/* State Plakette (bottom) */}
                           {showStatePlakette && (
-                            <StatePlakette state={state} city={city} scale={scale * 0.95} />
+                            <StatePlakette state={state} city={city} scale={scale * 0.95} isHovering={isHovering} tilt={tilt} />
                           )}
                         </div>
                       )}
                       
                       {/* Letters and numbers */}
-                      <span style={textStyle}>{letters} {numbers}{suffix}</span>
+                      <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{letters} {numbers}{suffix}</span>
                     </>
                   )}
                 </>
               ) : (
-                <span style={textStyle}>{plateText || ''}</span>
+                <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{plateText || ''}</span>
               )}
             </div>
           </div>
