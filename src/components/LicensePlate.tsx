@@ -4,6 +4,7 @@ import React, { forwardRef, useRef, useState, useLayoutEffect, useEffect } from 
 import { GermanPlateConfig, PlateStyle } from '@/types/plate';
 import EUBand from './EUBand';
 import StatePlakette from './StatePlakette';
+import AustrianStatePlakette from './AustrianStatePlakette';
 import HUPlakette from './HUPlakette';
 import BundeswehrPlakette from './BundeswehrPlakette';
 
@@ -87,7 +88,7 @@ function getCountryFeatures(country: string): {
 
 const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
   ({ config, scale = 1 }, ref) => {
-    const { cityCode, letters, numbers, suffix, showStatePlakette, showHUPlakette, state, city, huYear, huMonth, width, plateStyle, country, fontColor, backgroundColor, plateText, rightBandText, seasonalPlate } = config;
+    const { cityCode, letters, numbers, suffix, showStatePlakette, showHUPlakette, state, city, huYear, huMonth, width, plateStyle, country, fontColor, backgroundColor, plateText, rightBandText, seasonalPlate, austrianState } = config;
     
     const contentRef = useRef<HTMLDivElement>(null);
     const plateRef = useRef<HTMLDivElement>(null);
@@ -116,14 +117,19 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
       setTilt({ rotateX: 0, rotateY: 0 });
     };
     
-    // Wait for EuroPlate font to load
+    // Wait for fonts to load
     useEffect(() => {
       if (typeof document !== 'undefined' && document.fonts) {
-        document.fonts.ready.then(() => {
+        const fontPromises = [
+          document.fonts.load('105px EuroPlate'),
+          document.fonts.load('105px "Google Sans"')
+        ];
+        
+        Promise.all(fontPromises).then(() => {
           setFontLoaded(true);
         });
-        // Also check if already loaded
-        document.fonts.load('105px EuroPlate').then(() => {
+        
+        document.fonts.ready.then(() => {
           setFontLoaded(true);
         });
       } else {
@@ -150,7 +156,7 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
     // Colors come directly from config (set by PlateGenerator on country change)
     const textColor = fontColor;
     const plateBgColor = backgroundColor;
-    const redStripeHeight = 5 * scale;
+    const redStripeHeight = 2 * scale;
     
     // Available width for content (after EU band, borders, padding, and right band if present)
     const rightBandWidth = countryFeatures.hasRightBand ? euBandWidth : 0;
@@ -213,6 +219,7 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
       fontWeight: 'normal',
       letterSpacing: `${2 * scale}px`,
       whiteSpace: 'nowrap',
+      fontFamily: 'EuroPlate, sans-serif',
     };
     
     // Carbon fiber pattern - diagonal stripes
@@ -315,7 +322,7 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
               width: `${plateWidth}px`,
               height: `${plateHeight}px`,
               backgroundColor: plateBgColor,
-              border: `${borderWidth}px solid ${styles.borderColor}`,
+              border: `${borderWidth}px solid ${country === 'A' ? 'transparent' : styles.borderColor}`,
               borderRadius: `${8 * scale}px`,
               fontFamily: 'EuroPlate, sans-serif',
               transformStyle: 'preserve-3d',
@@ -325,26 +332,46 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
                 : 'none',
             }}
           >
-          {/* Austrian red stripes */}
+          {/* Austrian red stripes - double stripes top and bottom, full width */}
           {countryFeatures.hasRedStripes && (
             <>
+              {/* Top stripes - spacing equals stripe height */}
               <div style={{
                 position: 'absolute',
                 top: 0,
-                left: `${euBandWidth}px`,
+                left: 0,
                 right: 0,
                 height: `${redStripeHeight}px`,
                 backgroundColor: '#C8102E',
-                zIndex: 1,
+                zIndex: 0,
+              }} />
+              <div style={{
+                position: 'absolute',
+                top: `${redStripeHeight * 2}px`,
+                left: 0,
+                right: 0,
+                height: `${redStripeHeight}px`,
+                backgroundColor: '#C8102E',
+                zIndex: 0,
+              }} />
+              {/* Bottom stripes - spacing equals stripe height */}
+              <div style={{
+                position: 'absolute',
+                bottom: `${redStripeHeight * 2}px`,
+                left: 0,
+                right: 0,
+                height: `${redStripeHeight}px`,
+                backgroundColor: '#C8102E',
+                zIndex: 0,
               }} />
               <div style={{
                 position: 'absolute',
                 bottom: 0,
-                left: `${euBandWidth}px`,
+                left: 0,
                 right: 0,
                 height: `${redStripeHeight}px`,
                 backgroundColor: '#C8102E',
-                zIndex: 1,
+                zIndex: 0,
               }} />
             </>
           )}
@@ -362,6 +389,7 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
               alignItems: 'center',
               justifyContent: 'center',
               padding: `${15 * scale}px ${4 * scale}px`,
+              zIndex: 2,
             }}>
               <div style={{
                 width: '100%',
@@ -378,7 +406,20 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
             </div>
           ) : (
             /* Standard EU Band */
-            <EUBand scale={scale} countryCode={country} />
+            <div style={{
+              position: 'absolute',
+              left: 0,
+              top: country === 'A' ? `${redStripeHeight * 3}px` : 0,
+              bottom: country === 'A' ? `${redStripeHeight * 3}px` : 0,
+              width: `${euBandWidth}px`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: country === 'A' ? `0 ${3 * scale}px` : '0',
+              zIndex: 2,
+            }}>
+              <EUBand scale={scale} countryCode={country} height={country === 'A' ? '100%' : undefined} noBorderRadius={country === 'A'} />
+            </div>
           )}
           
           {/* Right band for France, Italy, Portugal */}
@@ -492,6 +533,22 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
                       <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{letters}{'\u200A'}{numbers}{suffix}</span>
                     </>
                   )}
+                </>
+              ) : country === 'A' ? (
+                /* Austrian format with Bundesland plakette */
+                <>
+                  {/* City code */}
+                  <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{cityCode}</span>
+                  
+                  {/* Austrian Bundesland Plakette - plain emblem */}
+                  {showStatePlakette && (
+                    <div style={{ transformStyle: 'preserve-3d' }}>
+                      <AustrianStatePlakette state={state} scale={scale * 1.3} />
+                    </div>
+                  )}
+                  
+                  {/* Free text for Austria */}
+                  <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{plateText || ''}</span>
                 </>
               ) : (
                 <span style={{ ...textStyle, transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}>{plateText || ''}</span>

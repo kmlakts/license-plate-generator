@@ -6,11 +6,14 @@ import { EUCountry } from '@/types/plate';
 interface EUBandProps {
   scale?: number;
   countryCode?: EUCountry;
+  height?: number | string;  // Optional height for constrained layouts (e.g., Austria)
+  noBorderRadius?: boolean;  // Remove border radius (for Austria)
 }
 
-export default function EUBand({ scale = 1, countryCode = 'D' }: EUBandProps) {
+export default function EUBand({ scale = 1, countryCode = 'D', height, noBorderRadius = false }: EUBandProps) {
   const width = 45 * scale;
-  const height = 110 * scale;
+  const defaultHeight = 110 * scale;
+  const actualHeight = height || defaultHeight;
   
   return (
     <div 
@@ -21,9 +24,9 @@ export default function EUBand({ scale = 1, countryCode = 'D' }: EUBandProps) {
         justifyContent: 'center',
         gap: `${8 * scale}px`,
         width: `${width}px`,
-        height: `${height}px`,
+        height: actualHeight,
         backgroundColor: '#003399',
-        borderRadius: `${6 * scale}px 0 0 ${6 * scale}px`,
+        borderRadius: noBorderRadius ? '0' : `${6 * scale}px 0 0 ${6 * scale}px`,
         padding: `${6 * scale}px ${4 * scale}px`,
       }}
     >

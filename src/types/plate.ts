@@ -93,7 +93,7 @@ export interface PlateConfig {
   suffix: PlateSuffix;     // E for electric, H for historic
   showStatePlakette: boolean;
   showHUPlakette: boolean;
-  state: GermanState;
+  state: GermanState | AustrianState;  // State/Bundesland for Germany or Austria
   city: string;            // City name shown on state plakette
   huYear: number;          // Year for HU sticker
   huMonth: number;         // Month for HU sticker (1-12)
@@ -102,6 +102,17 @@ export interface PlateConfig {
 
 // Keep GermanPlateConfig for backward compatibility
 export type GermanPlateConfig = PlateConfig;
+
+export type AustrianState =
+  | 'W'   // Wien
+  | 'N'   // Niederösterreich
+  | 'O'   // Oberösterreich
+  | 'B'   // Burgenland
+  | 'ST'  // Steiermark
+  | 'K'   // Kärnten
+  | 'S'   // Salzburg
+  | 'T'   // Tirol
+  | 'V';  // Vorarlberg
 
 export type GermanState =
   | 'BW'   // Baden-Württemberg
@@ -120,6 +131,18 @@ export type GermanState =
   | 'ST'   // Sachsen-Anhalt
   | 'SH'   // Schleswig-Holstein
   | 'TH';  // Thüringen
+
+export const AUSTRIAN_STATE_NAMES: Record<AustrianState, string> = {
+  W: 'Wien',
+  N: 'Niederösterreich',
+  O: 'Oberösterreich',
+  B: 'Burgenland',
+  ST: 'Steiermark',
+  K: 'Kärnten',
+  S: 'Salzburg',
+  T: 'Tirol',
+  V: 'Vorarlberg',
+};
 
 export const STATE_NAMES: Record<GermanState, string> = {
   BW: 'Baden-Württemberg',

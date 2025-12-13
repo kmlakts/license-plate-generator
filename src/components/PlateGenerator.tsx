@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { domToPng } from 'modern-screenshot';
-import { GermanPlateConfig, GermanState, STATE_NAMES, PlateWidth, PlateSuffix, PlateStyle, EUCountry } from '@/types/plate';
+import { GermanPlateConfig, GermanState, STATE_NAMES, AustrianState, AUSTRIAN_STATE_NAMES, PlateWidth, PlateSuffix, PlateStyle, EUCountry } from '@/types/plate';
 import LicensePlate from './LicensePlate';
 import { useTranslation, Language, LANGUAGE_NAMES, LANGUAGE_FLAGS, SUPPORTED_LANGUAGES } from '@/i18n';
 
@@ -132,7 +132,7 @@ function parseConfigFromHash(): GermanPlateConfig {
     suffix: (params.get('suffix') as PlateSuffix) || DEFAULT_CONFIG.suffix,
     showStatePlakette: params.get('wappen') !== '0',
     showHUPlakette: params.get('hu') !== '0',
-    state: (params.get('state') as GermanState) || DEFAULT_CONFIG.state,
+    state: (params.get('state') as (GermanState | AustrianState)) || DEFAULT_CONFIG.state,
     city: params.get('city') || DEFAULT_CONFIG.city,
     huYear: parseInt(params.get('huYear') || String(DEFAULT_CONFIG.huYear)),
     huMonth: parseInt(params.get('huMonth') || String(DEFAULT_CONFIG.huMonth)),
@@ -178,6 +178,7 @@ export default function PlateGenerator() {
   const { t, language, changeLanguage } = useTranslation();
   const [config, setConfig] = useState<GermanPlateConfig>(DEFAULT_CONFIG);
   const [showGermanOptions, setShowGermanOptions] = useState(true);
+  const [showAustrianOptions, setShowAustrianOptions] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const [plateTexture, setPlateTexture] = useState<string | null>(null);
   const [show3DPreview, setShow3DPreview] = useState(false);
@@ -394,8 +395,11 @@ export default function PlateGenerator() {
                     fontColor: countryDefaults.fontColor,
                     backgroundColor: countryDefaults.backgroundColor,
                     rightBandText: countryDefaults.rightBandText,
+                    // Reset state to appropriate default when switching countries
+                    state: newCountry === 'A' ? 'W' : 'BY',
                   }));
                   setShowGermanOptions(newCountry === 'D');
+                  setShowAustrianOptions(newCountry === 'A');
                 }}
                 className="modern-select"
               >
@@ -407,8 +411,8 @@ export default function PlateGenerator() {
               </select>
             </div>
 
-            {/* Plate Text - for non-German plates */}
-            {config.country !== 'D' && (
+            {/* Plate Text - for non-German and non-Austrian plates */}
+            {config.country !== 'D' && config.country !== 'A' && (
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.plateText}
@@ -457,7 +461,24 @@ export default function PlateGenerator() {
               </div>
             )}
 
-            {/* German plate inputs - Letters */}
+            {/* Austrian plate inputs - City Code */}
+            {config.country === 'A' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                  Bezirkskennzeichen
+                </label>
+                <input
+                  type="text"
+                  value={config.cityCode}
+                  onChange={(e) => handleChange('cityCode', e.target.value.toUpperCase().slice(0, 3))}
+                  className="modern-input"
+                  maxLength={3}
+                  placeholder="W, WU, N..."
+                />
+              </div>
+            )}
+
+            {/* Letters input - only for German plates */}
             {config.country === 'D' && config.cityCode !== 'Y' && (
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
@@ -474,7 +495,24 @@ export default function PlateGenerator() {
               </div>
             )}
 
-            {/* German plate inputs - Numbers */}
+            {/* Austrian plate inputs - Free text */}
+            {config.country === 'A' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                  Buchstaben- und Zahlenkombination
+                </label>
+                <input
+                  type="text"
+                  value={config.plateText}
+                  onChange={(e) => handleChange('plateText', e.target.value.toUpperCase().slice(0, 7))}
+                  className="modern-input"
+                  maxLength={7}
+                  placeholder="AB12345"
+                />
+              </div>
+            )}
+
+            {/* Numbers input - only for German plates */}
             {config.country === 'D' && (
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
@@ -755,6 +793,44 @@ export default function PlateGenerator() {
                       </div>
                     </>
                   )}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Austrian-specific options - collapsible */}
+          {config.country === 'A' && (
+            <div className="mt-6 border-t border-gray-200/50 dark:border-gray-700/50 pt-6">
+              <button
+                onClick={() => setShowAustrianOptions(!showAustrianOptions)}
+                className="flex items-center gap-3 text-lg font-medium text-gray-800 dark:text-white mb-4 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-300 group"
+              >
+                <span className={`transform transition-transform duration-300 ${showAustrianOptions ? 'rotate-90' : ''} group-hover:text-purple-500`}>▶</span>
+                <span className="flex items-center gap-2">
+                  <span className="text-2xl">🇦🇹</span>
+                  Bundesland
+                </span>
+              </button>
+              
+              {showAustrianOptions && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in slide-in-from-top-2 duration-300">
+                  {/* Austrian State Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                      Bundesland
+                    </label>
+                    <select
+                      value={config.state}
+                      onChange={(e) => handleChange('state', e.target.value as AustrianState)}
+                      className="modern-select"
+                    >
+                      {Object.entries(AUSTRIAN_STATE_NAMES).map(([code, name]) => (
+                        <option key={code} value={code}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               )}
             </div>
