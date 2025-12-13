@@ -315,8 +315,37 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
             </>
           )}
           
-          {/* EU Band - fixed position */}
-          <EUBand scale={scale} countryCode={country} />
+          {/* EU Band or German Flag for military */}
+          {country === 'D' && cityCode === 'Y' ? (
+            /* German Flag for military plates */
+            <div style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: `${euBandWidth}px`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: `${8 * scale}px ${4 * scale}px`,
+            }}>
+              <div style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: `${2 * scale}px`,
+                overflow: 'hidden',
+              }}>
+                <div style={{ flex: 1, backgroundColor: '#000000' }} />
+                <div style={{ flex: 1, backgroundColor: '#DD0000' }} />
+                <div style={{ flex: 1, backgroundColor: '#FFCE00' }} />
+              </div>
+            </div>
+          ) : (
+            /* Standard EU Band */
+            <EUBand scale={scale} countryCode={country} />
+          )}
           
           {/* Right band for France, Italy, Portugal */}
           {countryFeatures.hasRightBand && (
@@ -371,34 +400,41 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
             >
               {isGermany ? (
                 <>
-                  {/* City code */}
-                  <span style={textStyle}>{cityCode}</span>
-                  
-                  {/* Plaketten - counter-scale to maintain aspect ratio */}
-                  {(showStatePlakette || showHUPlakette) && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: `${4 * scale}px`,
-                        flexShrink: 0,
-                        transform: compressionRatio < 1 ? `scaleX(${1 / compressionRatio})` : undefined,
-                      }}
-                    >
-                      {/* HU Plakette (top) - use visibility to keep space */}
-                      <div style={{ visibility: showHUPlakette ? 'visible' : 'hidden', height: showHUPlakette || showStatePlakette ? undefined : 0 }}>
-                        <HUPlakette year={huYear} month={huMonth} scale={scale * 0.8} />
-                      </div>
-                      {/* State Plakette (bottom) */}
-                      {showStatePlakette && (
-                        <StatePlakette state={state} city={city} scale={scale * 0.95} />
+                  {cityCode === 'Y' ? (
+                    /* Military format: Y-123456 */
+                    <span style={textStyle}>{cityCode}-{numbers}</span>
+                  ) : (
+                    <>
+                      {/* City code */}
+                      <span style={textStyle}>{cityCode}</span>
+                      
+                      {/* Plaketten - counter-scale to maintain aspect ratio */}
+                      {(showStatePlakette || showHUPlakette) && (
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: `${4 * scale}px`,
+                            flexShrink: 0,
+                            transform: compressionRatio < 1 ? `scaleX(${1 / compressionRatio})` : undefined,
+                          }}
+                        >
+                          {/* HU Plakette (top) - use visibility to keep space */}
+                          <div style={{ visibility: showHUPlakette ? 'visible' : 'hidden', height: showHUPlakette || showStatePlakette ? undefined : 0 }}>
+                            <HUPlakette year={huYear} month={huMonth} scale={scale * 0.8} />
+                          </div>
+                          {/* State Plakette (bottom) */}
+                          {showStatePlakette && (
+                            <StatePlakette state={state} city={city} scale={scale * 0.95} />
+                          )}
+                        </div>
                       )}
-                    </div>
+                      
+                      {/* Letters and numbers */}
+                      <span style={textStyle}>{letters} {numbers}{suffix}</span>
+                    </>
                   )}
-                  
-                  {/* Letters and numbers */}
-                  <span style={textStyle}>{letters} {numbers}{suffix}</span>
                 </>
               ) : (
                 <span style={textStyle}>{plateText || ''}</span>

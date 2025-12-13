@@ -81,9 +81,9 @@ export interface PlateConfig {
   rightBandText: string;   // Text for right band (France, Italy, Portugal)
   
   // German-specific settings
-  cityCode: string;        // e.g., "M", "B", "HH"
-  letters: string;         // e.g., "AB"
-  numbers: string;         // e.g., "1234"
+  cityCode: string;        // e.g., "M", "B", "HH" or "Y" for military (auto-detected)
+  letters: string;         // e.g., "AB" (empty for military Y plates)
+  numbers: string;         // e.g., "1234" or "123456" for military
   suffix: PlateSuffix;     // E for electric, H for historic
   showStatePlakette: boolean;
   showHUPlakette: boolean;

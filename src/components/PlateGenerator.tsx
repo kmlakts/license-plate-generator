@@ -412,7 +412,7 @@ export default function PlateGenerator() {
             {config.country === 'D' && (
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-                  {t.cityCode}
+                  {config.cityCode === 'Y' ? '🪖 Kennbuchstabe' : t.cityCode}
                 </label>
                 <input
                   type="text"
@@ -420,13 +420,13 @@ export default function PlateGenerator() {
                   onChange={(e) => handleChange('cityCode', e.target.value.toUpperCase().slice(0, 3))}
                   className="modern-input"
                   maxLength={3}
-                  placeholder="M, B, HH..."
+                  placeholder={config.cityCode === 'Y' ? "Y" : "M, B, HH..."}
                 />
               </div>
             )}
 
             {/* German plate inputs - Letters */}
-            {config.country === 'D' && (
+            {config.country === 'D' && config.cityCode !== 'Y' && (
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.letters}
@@ -446,15 +446,15 @@ export default function PlateGenerator() {
             {config.country === 'D' && (
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-                  {t.numbers}
+                  {config.cityCode === 'Y' ? 'Ziffernfolge' : t.numbers}
                 </label>
                 <input
                   type="text"
                   value={config.numbers}
-                  onChange={(e) => handleChange('numbers', e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  onChange={(e) => handleChange('numbers', e.target.value.replace(/\D/g, '').slice(0, config.cityCode === 'Y' ? 6 : 4))}
                   className="modern-input"
-                  maxLength={4}
-                  placeholder="1234"
+                  maxLength={config.cityCode === 'Y' ? 6 : 4}
+                  placeholder={config.cityCode === 'Y' ? "123456" : "1234"}
                 />
               </div>
             )}
@@ -537,7 +537,7 @@ export default function PlateGenerator() {
             </div>
 
             {/* Suffix Selection (E/H) - only for Germany */}
-            {config.country === 'D' && (
+            {config.country === 'D' && config.cityCode !== 'Y' && (
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.suffix}
@@ -556,7 +556,7 @@ export default function PlateGenerator() {
           </div>
 
           {/* German-specific options - collapsible */}
-          {config.country === 'D' && (
+          {config.country === 'D' && config.cityCode !== 'Y' && (
             <div className="mt-6 border-t border-gray-200/50 dark:border-gray-700/50 pt-6">
               <button
                 onClick={() => setShowGermanOptions(!showGermanOptions)}
