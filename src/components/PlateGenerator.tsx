@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import * as htmlToImage from 'html-to-image';
 import { GermanPlateConfig, GermanState, STATE_NAMES, PlateWidth, PlateSuffix, PlateStyle, EUCountry, EU_COUNTRY_NAMES } from '@/types/plate';
 import LicensePlate from './LicensePlate';
-import { useTranslation, Language, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@/i18n';
+import { useTranslation, Language, LANGUAGE_NAMES, LANGUAGE_FLAGS, SUPPORTED_LANGUAGES } from '@/i18n';
 
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -291,37 +291,60 @@ export default function PlateGenerator() {
   }, [config, t]);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-purple-950 dark:to-gray-900 p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
-        {/* Language Selector */}
-        <div className="flex justify-end mb-4">
-          <select
-            value={language}
-            onChange={(e) => changeLanguage(e.target.value as Language)}
-            className="px-3 py-1 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          >
-            {SUPPORTED_LANGUAGES.map((lang) => (
-              <option key={lang} value={lang}>
-                {LANGUAGE_NAMES[lang]}
-              </option>
-            ))}
-          </select>
+        {/* Header with Language Selector and Links */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <a 
+              href="https://github.com/niklaswa/license-plate-generator" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-xl border border-white/20 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+              GitHub
+            </a>
+            <a 
+              href="https://ts.la/niklas82130" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-red-500/80 hover:bg-red-500 backdrop-blur-sm text-white text-sm font-medium rounded-xl border border-red-400/30 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-red-500/25"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="-38.0376 -63.1255 329.6592 378.753"><path d="M126.806 252.502l35.476-199.519c33.815 0 44.481 3.708 46.021 18.843 0 0 22.684-8.458 34.125-25.636-44.646-20.688-89.505-21.621-89.505-21.621l-26.176 31.882.059-.004-26.176-31.883s-44.86.934-89.5 21.622c11.431 17.178 34.124 25.636 34.124 25.636 1.549-15.136 12.202-18.844 45.79-18.868l35.762 199.548"/><path d="M126.792 15.36c36.09-.276 77.399 5.583 119.687 24.014 5.652-10.173 7.105-14.669 7.105-14.669C207.357 6.416 164.066.157 126.787 0 89.51.157 46.221 6.417 0 24.705c0 0 2.062 5.538 7.1 14.669 42.28-18.431 83.596-24.29 119.687-24.014h.005"/></svg>
+              Tesla
+            </a>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+            <span>🌐</span>
+            <select
+              value={language}
+              onChange={(e) => changeLanguage(e.target.value as Language)}
+              className="bg-transparent text-white text-sm focus:outline-none cursor-pointer"
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang} value={lang} className="bg-gray-800 text-white">
+                  {LANGUAGE_FLAGS[lang]} {LANGUAGE_NAMES[lang]}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-8 text-white drop-shadow-lg">
           {t.pageTitle}
         </h1>
 
         {/* Controls */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+        <div className="glass-card rounded-2xl shadow-2xl p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">
             {t.configureTitle}
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {/* Country Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                 {t.country}
               </label>
               <select
@@ -338,11 +361,11 @@ export default function PlateGenerator() {
                   }));
                   setShowGermanOptions(newCountry === 'D');
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="modern-select"
               >
-                {Object.entries(EU_COUNTRY_NAMES).map(([code, name]) => (
+                {Object.keys(t.countries).map((code) => (
                   <option key={code} value={code}>
-                    {COUNTRY_FLAGS[code as EUCountry]} {name} ({code})
+                    {COUNTRY_FLAGS[code as EUCountry]} {t.countries[code as keyof typeof t.countries]} ({code})
                   </option>
                 ))}
               </select>
@@ -351,14 +374,14 @@ export default function PlateGenerator() {
             {/* Plate Text - for non-German plates */}
             {config.country !== 'D' && (
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.plateText}
                 </label>
                 <input
                   type="text"
                   value={config.plateText}
                   onChange={(e) => handleChange('plateText', e.target.value.toUpperCase())}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="modern-input"
                   placeholder="AB 123 CD"
                 />
               </div>
@@ -367,14 +390,14 @@ export default function PlateGenerator() {
             {/* Right band text - for France, Italy, Portugal */}
             {['F', 'I', 'P'].includes(config.country) && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.rightBandText || 'Region/Code'}
                 </label>
                 <input
                   type="text"
                   value={config.rightBandText}
                   onChange={(e) => handleChange('rightBandText', e.target.value.toUpperCase().slice(0, 3))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="modern-input"
                   maxLength={3}
                   placeholder={config.country === 'F' ? '75' : config.country === 'I' ? 'RM' : ''}
                 />
@@ -384,14 +407,14 @@ export default function PlateGenerator() {
             {/* German plate inputs - City Code */}
             {config.country === 'D' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.cityCode}
                 </label>
                 <input
                   type="text"
                   value={config.cityCode}
                   onChange={(e) => handleChange('cityCode', e.target.value.toUpperCase().slice(0, 3))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="modern-input"
                   maxLength={3}
                   placeholder="M, B, HH..."
                 />
@@ -401,14 +424,14 @@ export default function PlateGenerator() {
             {/* German plate inputs - Letters */}
             {config.country === 'D' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.letters}
                 </label>
                 <input
                   type="text"
                   value={config.letters}
                   onChange={(e) => handleChange('letters', e.target.value.toUpperCase().slice(0, 2))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="modern-input"
                   maxLength={2}
                   placeholder="AB"
                 />
@@ -418,14 +441,14 @@ export default function PlateGenerator() {
             {/* German plate inputs - Numbers */}
             {config.country === 'D' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.numbers}
                 </label>
                 <input
                   type="text"
                   value={config.numbers}
                   onChange={(e) => handleChange('numbers', e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="modern-input"
                   maxLength={4}
                   placeholder="1234"
                 />
@@ -434,13 +457,13 @@ export default function PlateGenerator() {
 
             {/* Width Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                 {t.plateWidth}
               </label>
               <select
                 value={config.width}
                 onChange={(e) => handleChange('width', e.target.value as PlateWidth)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="modern-select"
               >
                 <option value="standard">{t.widthStandard}</option>
                 <option value="compact">{t.widthCompact}</option>
@@ -449,13 +472,13 @@ export default function PlateGenerator() {
 
             {/* Plate Style Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                 {t.plateStyle}
               </label>
               <select
                 value={config.plateStyle}
                 onChange={(e) => handleChange('plateStyle', e.target.value as PlateStyle)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="modern-select"
               >
                 <option value="normal">{t.styleNormal}</option>
                 <option value="3d-black-glossy">{t.style3DBlack}</option>
@@ -467,7 +490,7 @@ export default function PlateGenerator() {
 
             {/* Font Color */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                 {t.fontColor}
               </label>
               <div className="flex gap-2">
@@ -475,13 +498,13 @@ export default function PlateGenerator() {
                   type="color"
                   value={config.fontColor}
                   onChange={(e) => handleChange('fontColor', e.target.value)}
-                  className="w-12 h-10 border border-gray-300 rounded-md cursor-pointer dark:border-gray-600"
+                  className="w-12 h-10 border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer"
                 />
                 <input
                   type="text"
                   value={config.fontColor}
                   onChange={(e) => handleChange('fontColor', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="modern-input flex-1"
                   placeholder="#000000"
                 />
               </div>
@@ -489,7 +512,7 @@ export default function PlateGenerator() {
 
             {/* Background Color */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                 {t.backgroundColor}
               </label>
               <div className="flex gap-2">
@@ -497,13 +520,13 @@ export default function PlateGenerator() {
                   type="color"
                   value={config.backgroundColor}
                   onChange={(e) => handleChange('backgroundColor', e.target.value)}
-                  className="w-12 h-10 border border-gray-300 rounded-md cursor-pointer dark:border-gray-600"
+                  className="w-12 h-10 border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer"
                 />
                 <input
                   type="text"
                   value={config.backgroundColor}
                   onChange={(e) => handleChange('backgroundColor', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="modern-input flex-1"
                   placeholder="#FFFFFF"
                 />
               </div>
@@ -512,13 +535,13 @@ export default function PlateGenerator() {
             {/* Suffix Selection (E/H) - only for Germany */}
             {config.country === 'D' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                   {t.suffix}
                 </label>
                 <select
                   value={config.suffix}
                   onChange={(e) => handleChange('suffix', e.target.value as PlateSuffix)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="modern-select"
                 >
                   <option value="">Normal</option>
                   <option value="E">E (Elektro)</option>
@@ -530,26 +553,29 @@ export default function PlateGenerator() {
 
           {/* German-specific options - collapsible */}
           {config.country === 'D' && (
-            <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div className="mt-6 border-t border-gray-200/50 dark:border-gray-700/50 pt-6">
               <button
                 onClick={() => setShowGermanOptions(!showGermanOptions)}
-                className="flex items-center gap-2 text-lg font-medium text-gray-900 dark:text-white mb-4 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                className="flex items-center gap-3 text-lg font-medium text-gray-800 dark:text-white mb-4 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-300 group"
               >
-                <span className={`transform transition-transform ${showGermanOptions ? 'rotate-90' : ''}`}>▶</span>
-                🇩🇪 {t.state} / {t.city}
+                <span className={`transform transition-transform duration-300 ${showGermanOptions ? 'rotate-90' : ''} group-hover:text-purple-500`}>▶</span>
+                <span className="flex items-center gap-2">
+                  <span className="text-2xl">🇩🇪</span>
+                  {t.state} / {t.city}
+                </span>
               </button>
               
               {showGermanOptions && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in slide-in-from-top-2 duration-300">
                   {/* State Selection */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                       {t.state}
                     </label>
                     <select
                       value={config.state}
                       onChange={(e) => handleChange('state', e.target.value as GermanState)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="modern-select"
                     >
                       {Object.entries(STATE_NAMES).map(([code, name]) => (
                         <option key={code} value={code}>
@@ -561,14 +587,14 @@ export default function PlateGenerator() {
 
                   {/* City Name */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                       {t.city}
                     </label>
                     <input
                       type="text"
                       value={config.city}
                       onChange={(e) => handleChange('city', e.target.value.slice(0, 35))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="modern-input"
                       maxLength={35}
                       placeholder="München, Düsseldorf..."
                     />
@@ -576,13 +602,13 @@ export default function PlateGenerator() {
 
                   {/* HU Year */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                       {t.huYear}
                     </label>
                     <select
                       value={config.huYear}
                       onChange={(e) => handleChange('huYear', parseInt(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="modern-select"
                     >
                       {Array.from({ length: 10 }, (_, i) => CURRENT_YEAR + i).map((year) => (
                         <option key={year} value={year}>
@@ -594,13 +620,13 @@ export default function PlateGenerator() {
 
                   {/* HU Month */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
                       {t.huMonth}
                     </label>
                     <select
                       value={config.huMonth}
                       onChange={(e) => handleChange('huMonth', parseInt(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="modern-select"
                     >
                       {t.months.map((monthName, index) => (
                         <option key={index + 1} value={index + 1}>
@@ -611,24 +637,24 @@ export default function PlateGenerator() {
                   </div>
 
                   {/* Checkboxes */}
-                  <div className="flex flex-col gap-2">
-                    <label className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <div className="flex flex-col gap-3">
+                    <label className="flex items-center gap-3 text-gray-700 dark:text-gray-300 cursor-pointer group">
                       <input
                         type="checkbox"
                         checked={config.showStatePlakette}
                         onChange={(e) => handleChange('showStatePlakette', e.target.checked)}
-                        className="rounded text-blue-600 focus:ring-blue-500"
+                        className="w-5 h-5 rounded-lg text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-gray-600 transition-all"
                       />
-                      {t.showStatePlakette}
+                      <span className="group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{t.showStatePlakette}</span>
                     </label>
-                    <label className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                    <label className="flex items-center gap-3 text-gray-700 dark:text-gray-300 cursor-pointer group">
                       <input
                         type="checkbox"
                         checked={config.showHUPlakette}
                         onChange={(e) => handleChange('showHUPlakette', e.target.checked)}
-                        className="rounded text-blue-600 focus:ring-blue-500"
+                        className="w-5 h-5 rounded-lg text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-gray-600 transition-all"
                       />
-                      {t.showHUPlakette}
+                      <span className="group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">{t.showHUPlakette}</span>
                     </label>
                   </div>
                 </div>
@@ -638,11 +664,11 @@ export default function PlateGenerator() {
         </div>
 
         {/* Preview */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+        <div className="glass-card rounded-2xl shadow-2xl p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">
             {t.previewTitle}
           </h2>
-          <div className="p-8 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-track]:bg-transparent">
+          <div className="p-8 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-xl overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-purple-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent shadow-inner">
             <div className="flex justify-center min-w-fit">
               <LicensePlate ref={plateRef} config={config} scale={1.5} />
             </div>
@@ -650,14 +676,14 @@ export default function PlateGenerator() {
         </div>
 
         {/* Export Button */}
-        <div className="text-center">
+        <div className="text-center pb-8">
           <button
             onClick={exportAsPNG}
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition-colors duration-200"
+            className="px-10 py-4 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-2xl shadow-lg shadow-purple-500/30 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/40 text-lg"
           >
-            📥 {t.exportPNG} (420px)
+            📥 {t.exportPNG}
           </button>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-3 text-sm text-white/70">
             Export: 420 × 100-200 px
           </p>
         </div>

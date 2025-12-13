@@ -16,6 +16,22 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
   cs: 'Čeština',
 };
 
+export const LANGUAGE_FLAGS: Record<Language, string> = {
+  de: '🇩🇪',
+  en: '🇬🇧',
+  fr: '🇫🇷',
+  es: '🇪🇸',
+  it: '🇮🇹',
+  nl: '🇳🇱',
+  pl: '🇵🇱',
+  pt: '🇵🇹',
+  sv: '🇸🇪',
+  cs: '🇨🇿',
+};
+
+// EU Country codes type
+export type EUCountryCode = 'D' | 'A' | 'B' | 'BG' | 'HR' | 'CY' | 'CZ' | 'DK' | 'EST' | 'FIN' | 'F' | 'GR' | 'H' | 'IRL' | 'I' | 'LV' | 'LT' | 'L' | 'M' | 'NL' | 'PL' | 'P' | 'RO' | 'SK' | 'SLO' | 'E' | 'S';
+
 export interface Translations {
   // Page title
   pageTitle: string;
@@ -65,6 +81,9 @@ export interface Translations {
   
   // Months
   months: string[];
+  
+  // Country names
+  countries: Record<EUCountryCode, string>;
 }
 
 const translations: Record<Language, Translations> = {
@@ -100,6 +119,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Export fehlgeschlagen. Bitte versuche es erneut.',
     wappenAttribution: 'Wappen: Wikimedia Commons (Public Domain / CC)',
     months: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+    countries: {
+      'D': 'Deutschland', 'A': 'Österreich', 'B': 'Belgien', 'BG': 'Bulgarien', 'HR': 'Kroatien',
+      'CY': 'Zypern', 'CZ': 'Tschechien', 'DK': 'Dänemark', 'EST': 'Estland', 'FIN': 'Finnland',
+      'F': 'Frankreich', 'GR': 'Griechenland', 'H': 'Ungarn', 'IRL': 'Irland', 'I': 'Italien',
+      'LV': 'Lettland', 'LT': 'Litauen', 'L': 'Luxemburg', 'M': 'Malta', 'NL': 'Niederlande',
+      'PL': 'Polen', 'P': 'Portugal', 'RO': 'Rumänien', 'SK': 'Slowakei', 'SLO': 'Slowenien',
+      'E': 'Spanien', 'S': 'Schweden',
+    },
   },
   en: {
     pageTitle: '🇪🇺 EU License Plate Generator',
@@ -133,6 +160,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Export failed. Please try again.',
     wappenAttribution: 'Emblems: Wikimedia Commons (Public Domain / CC)',
     months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    countries: {
+      'D': 'Germany', 'A': 'Austria', 'B': 'Belgium', 'BG': 'Bulgaria', 'HR': 'Croatia',
+      'CY': 'Cyprus', 'CZ': 'Czech Republic', 'DK': 'Denmark', 'EST': 'Estonia', 'FIN': 'Finland',
+      'F': 'France', 'GR': 'Greece', 'H': 'Hungary', 'IRL': 'Ireland', 'I': 'Italy',
+      'LV': 'Latvia', 'LT': 'Lithuania', 'L': 'Luxembourg', 'M': 'Malta', 'NL': 'Netherlands',
+      'PL': 'Poland', 'P': 'Portugal', 'RO': 'Romania', 'SK': 'Slovakia', 'SLO': 'Slovenia',
+      'E': 'Spain', 'S': 'Sweden',
+    },
   },
   fr: {
     pageTitle: '🇪🇺 Générateur de Plaques EU',
@@ -166,6 +201,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Échec de l\'export. Veuillez réessayer.',
     wappenAttribution: 'Emblèmes: Wikimedia Commons (Domaine public / CC)',
     months: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+    countries: {
+      'D': 'Allemagne', 'A': 'Autriche', 'B': 'Belgique', 'BG': 'Bulgarie', 'HR': 'Croatie',
+      'CY': 'Chypre', 'CZ': 'Tchéquie', 'DK': 'Danemark', 'EST': 'Estonie', 'FIN': 'Finlande',
+      'F': 'France', 'GR': 'Grèce', 'H': 'Hongrie', 'IRL': 'Irlande', 'I': 'Italie',
+      'LV': 'Lettonie', 'LT': 'Lituanie', 'L': 'Luxembourg', 'M': 'Malte', 'NL': 'Pays-Bas',
+      'PL': 'Pologne', 'P': 'Portugal', 'RO': 'Roumanie', 'SK': 'Slovaquie', 'SLO': 'Slovénie',
+      'E': 'Espagne', 'S': 'Suède',
+    },
   },
   es: {
     pageTitle: '🇪🇺 Generador de Matrículas EU',
@@ -199,6 +242,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Error al exportar. Por favor, inténtalo de nuevo.',
     wappenAttribution: 'Emblemas: Wikimedia Commons (Dominio público / CC)',
     months: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+    countries: {
+      'D': 'Alemania', 'A': 'Austria', 'B': 'Bélgica', 'BG': 'Bulgaria', 'HR': 'Croacia',
+      'CY': 'Chipre', 'CZ': 'Chequia', 'DK': 'Dinamarca', 'EST': 'Estonia', 'FIN': 'Finlandia',
+      'F': 'Francia', 'GR': 'Grecia', 'H': 'Hungría', 'IRL': 'Irlanda', 'I': 'Italia',
+      'LV': 'Letonia', 'LT': 'Lituania', 'L': 'Luxemburgo', 'M': 'Malta', 'NL': 'Países Bajos',
+      'PL': 'Polonia', 'P': 'Portugal', 'RO': 'Rumanía', 'SK': 'Eslovaquia', 'SLO': 'Eslovenia',
+      'E': 'España', 'S': 'Suecia',
+    },
   },
   it: {
     pageTitle: '🇪🇺 Generatore Targhe EU',
@@ -232,6 +283,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Esportazione fallita. Riprova.',
     wappenAttribution: 'Stemmi: Wikimedia Commons (Pubblico dominio / CC)',
     months: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+    countries: {
+      'D': 'Germania', 'A': 'Austria', 'B': 'Belgio', 'BG': 'Bulgaria', 'HR': 'Croazia',
+      'CY': 'Cipro', 'CZ': 'Cechia', 'DK': 'Danimarca', 'EST': 'Estonia', 'FIN': 'Finlandia',
+      'F': 'Francia', 'GR': 'Grecia', 'H': 'Ungheria', 'IRL': 'Irlanda', 'I': 'Italia',
+      'LV': 'Lettonia', 'LT': 'Lituania', 'L': 'Lussemburgo', 'M': 'Malta', 'NL': 'Paesi Bassi',
+      'PL': 'Polonia', 'P': 'Portogallo', 'RO': 'Romania', 'SK': 'Slovacchia', 'SLO': 'Slovenia',
+      'E': 'Spagna', 'S': 'Svezia',
+    },
   },
   nl: {
     pageTitle: '🇪🇺 EU Kentekenplaat Generator',
@@ -265,6 +324,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Export mislukt. Probeer het opnieuw.',
     wappenAttribution: 'Emblemen: Wikimedia Commons (Publiek domein / CC)',
     months: ['Jan', 'Feb', 'Mrt', 'Apr', 'Mei', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
+    countries: {
+      'D': 'Duitsland', 'A': 'Oostenrijk', 'B': 'België', 'BG': 'Bulgarije', 'HR': 'Kroatië',
+      'CY': 'Cyprus', 'CZ': 'Tsjechië', 'DK': 'Denemarken', 'EST': 'Estland', 'FIN': 'Finland',
+      'F': 'Frankrijk', 'GR': 'Griekenland', 'H': 'Hongarije', 'IRL': 'Ierland', 'I': 'Italië',
+      'LV': 'Letland', 'LT': 'Litouwen', 'L': 'Luxemburg', 'M': 'Malta', 'NL': 'Nederland',
+      'PL': 'Polen', 'P': 'Portugal', 'RO': 'Roemenië', 'SK': 'Slowakije', 'SLO': 'Slovenië',
+      'E': 'Spanje', 'S': 'Zweden',
+    },
   },
   pl: {
     pageTitle: '🇪🇺 Generator Tablic EU',
@@ -298,6 +365,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Eksport nie powiódł się. Spróbuj ponownie.',
     wappenAttribution: 'Godła: Wikimedia Commons (Domena publiczna / CC)',
     months: ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'],
+    countries: {
+      'D': 'Niemcy', 'A': 'Austria', 'B': 'Belgia', 'BG': 'Bułgaria', 'HR': 'Chorwacja',
+      'CY': 'Cypr', 'CZ': 'Czechy', 'DK': 'Dania', 'EST': 'Estonia', 'FIN': 'Finlandia',
+      'F': 'Francja', 'GR': 'Grecja', 'H': 'Węgry', 'IRL': 'Irlandia', 'I': 'Włochy',
+      'LV': 'Łotwa', 'LT': 'Litwa', 'L': 'Luksemburg', 'M': 'Malta', 'NL': 'Holandia',
+      'PL': 'Polska', 'P': 'Portugalia', 'RO': 'Rumunia', 'SK': 'Słowacja', 'SLO': 'Słowenia',
+      'E': 'Hiszpania', 'S': 'Szwecja',
+    },
   },
   pt: {
     pageTitle: '🇪🇺 Gerador de Matrículas EU',
@@ -331,6 +406,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Falha na exportação. Tente novamente.',
     wappenAttribution: 'Emblemas: Wikimedia Commons (Domínio público / CC)',
     months: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+    countries: {
+      'D': 'Alemanha', 'A': 'Áustria', 'B': 'Bélgica', 'BG': 'Bulgária', 'HR': 'Croácia',
+      'CY': 'Chipre', 'CZ': 'Chéquia', 'DK': 'Dinamarca', 'EST': 'Estónia', 'FIN': 'Finlândia',
+      'F': 'França', 'GR': 'Grécia', 'H': 'Hungria', 'IRL': 'Irlanda', 'I': 'Itália',
+      'LV': 'Letónia', 'LT': 'Lituânia', 'L': 'Luxemburgo', 'M': 'Malta', 'NL': 'Países Baixos',
+      'PL': 'Polónia', 'P': 'Portugal', 'RO': 'Roménia', 'SK': 'Eslováquia', 'SLO': 'Eslovénia',
+      'E': 'Espanha', 'S': 'Suécia',
+    },
   },
   sv: {
     pageTitle: '🇪🇺 EU Registreringsskylt Generator',
@@ -364,6 +447,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Export misslyckades. Försök igen.',
     wappenAttribution: 'Emblem: Wikimedia Commons (Public Domain / CC)',
     months: ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
+    countries: {
+      'D': 'Tyskland', 'A': 'Österrike', 'B': 'Belgien', 'BG': 'Bulgarien', 'HR': 'Kroatien',
+      'CY': 'Cypern', 'CZ': 'Tjeckien', 'DK': 'Danmark', 'EST': 'Estland', 'FIN': 'Finland',
+      'F': 'Frankrike', 'GR': 'Grekland', 'H': 'Ungern', 'IRL': 'Irland', 'I': 'Italien',
+      'LV': 'Lettland', 'LT': 'Litauen', 'L': 'Luxemburg', 'M': 'Malta', 'NL': 'Nederländerna',
+      'PL': 'Polen', 'P': 'Portugal', 'RO': 'Rumänien', 'SK': 'Slovakien', 'SLO': 'Slovenien',
+      'E': 'Spanien', 'S': 'Sverige',
+    },
   },
   cs: {
     pageTitle: '🇪🇺 Generátor SPZ EU',
@@ -397,6 +488,14 @@ const translations: Record<Language, Translations> = {
     exportFailed: 'Export selhal. Zkuste to znovu.',
     wappenAttribution: 'Znaky: Wikimedia Commons (Public Domain / CC)',
     months: ['Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čvn', 'Čvc', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'],
+    countries: {
+      'D': 'Německo', 'A': 'Rakousko', 'B': 'Belgie', 'BG': 'Bulharsko', 'HR': 'Chorvatsko',
+      'CY': 'Kypr', 'CZ': 'Česko', 'DK': 'Dánsko', 'EST': 'Estonsko', 'FIN': 'Finsko',
+      'F': 'Francie', 'GR': 'Řecko', 'H': 'Maďarsko', 'IRL': 'Irsko', 'I': 'Itálie',
+      'LV': 'Lotyšsko', 'LT': 'Litva', 'L': 'Lucembursko', 'M': 'Malta', 'NL': 'Nizozemsko',
+      'PL': 'Polsko', 'P': 'Portugalsko', 'RO': 'Rumunsko', 'SK': 'Slovensko', 'SLO': 'Slovinsko',
+      'E': 'Španělsko', 'S': 'Švédsko',
+    },
   },
 };
 

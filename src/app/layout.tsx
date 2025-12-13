@@ -44,6 +44,15 @@ export default function RootLayout({
             >
               GitHub
             </a>
+            {' '}•{' '}
+            <a 
+              href="https://ts.la/niklas82130" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Tesla
+            </a>
           </p>
         </footer>
       </body>
