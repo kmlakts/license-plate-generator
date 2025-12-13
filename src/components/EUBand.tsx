@@ -38,8 +38,8 @@ export default function EUBand({ scale = 1, countryCode = 'D' }: EUBandProps) {
           {/* 12 stars in a circle - all pointing upward */}
           {Array.from({ length: 12 }).map((_, i) => {
             const angle = (i * 30 - 90) * (Math.PI / 180);
-            const cx = 18 + 13 * Math.cos(angle);
-            const cy = 18 + 13 * Math.sin(angle);
+            const cx = Math.round((18 + 13 * Math.cos(angle)) * 1000) / 1000;
+            const cy = Math.round((18 + 13 * Math.sin(angle)) * 1000) / 1000;
             return (
               <polygon
                 key={i}
@@ -73,7 +73,9 @@ function createStarPoints(cx: number, cy: number, outerR: number, innerR: number
   for (let i = 0; i < 10; i++) {
     const angle = (i * 36 - 90) * (Math.PI / 180);
     const r = i % 2 === 0 ? outerR : innerR;
-    points.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+    const x = Math.round((cx + r * Math.cos(angle)) * 1000) / 1000;
+    const y = Math.round((cy + r * Math.sin(angle)) * 1000) / 1000;
+    points.push(`${x},${y}`);
   }
   return points.join(' ');
 }

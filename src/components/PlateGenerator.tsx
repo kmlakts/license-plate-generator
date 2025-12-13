@@ -1,57 +1,156 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import * as htmlToImage from 'html-to-image';
+import dynamic from 'next/dynamic';
 import { GermanPlateConfig, GermanState, STATE_NAMES, PlateWidth, PlateSuffix, PlateStyle, EUCountry, EU_COUNTRY_NAMES } from '@/types/plate';
 import LicensePlate from './LicensePlate';
 import { useTranslation, Language, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@/i18n';
 
+// Dynamic import for 3D preview (no SSR for Three.js)
+const CarPreview3D = dynamic(() => import('./CarPreview3D'), { 
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] bg-gradient-to-b from-gray-800 to-gray-900 rounded-lg flex items-center justify-center">
+      <div className="text-white">Loading 3D Preview...</div>
+    </div>
+  )
+});
+
 const CURRENT_YEAR = new Date().getFullYear();
 
+// Country flag emojis
+const COUNTRY_FLAGS: Record<EUCountry, string> = {
+  'D': '🇩🇪',
+  'A': '🇦🇹',
+  'B': '🇧🇪',
+  'BG': '🇧🇬',
+  'HR': '🇭🇷',
+  'CY': '🇨🇾',
+  'CZ': '🇨🇿',
+  'DK': '🇩🇰',
+  'EST': '🇪🇪',
+  'FIN': '🇫🇮',
+  'F': '🇫🇷',
+  'GR': '🇬🇷',
+  'H': '🇭🇺',
+  'IRL': '🇮🇪',
+  'I': '🇮🇹',
+  'LV': '🇱🇻',
+  'LT': '🇱🇹',
+  'L': '🇱🇺',
+  'M': '🇲🇹',
+  'NL': '🇳🇱',
+  'PL': '🇵🇱',
+  'P': '🇵🇹',
+  'RO': '🇷🇴',
+  'SK': '🇸🇰',
+  'SLO': '🇸🇮',
+  'E': '🇪🇸',
+  'S': '🇸🇪',
+};
+
+// Country-specific default colors and settings
+function getCountryDefaults(country: EUCountry): { fontColor: string; backgroundColor: string; rightBandText: string } {
+  switch (country) {
+    // Yellow plates
+    case 'NL': // Netherlands - yellow
+      return { fontColor: '#000000', backgroundColor: '#F7D117', rightBandText: '' };
+    case 'L': // Luxembourg - yellow
+      return { fontColor: '#000000', backgroundColor: '#FCD116', rightBandText: '' };
+    case 'CY': // Cyprus - yellow
+      return { fontColor: '#000000', backgroundColor: '#F4C430', rightBandText: '' };
+    
+    // Red text plates
+    case 'B': // Belgium - white with red text
+      return { fontColor: '#C8102E', backgroundColor: '#FFFFFF', rightBandText: '' };
+    
+    // Blue text plates
+    case 'P': // Portugal - white with blue text + right band
+      return { fontColor: '#003399', backgroundColor: '#FFFFFF', rightBandText: '' };
+    
+    // Countries with right band
+    case 'F': // France - right band with region code
+      return { fontColor: '#000000', backgroundColor: '#FFFFFF', rightBandText: '75' };
+    case 'I': // Italy - right band with region code
+      return { fontColor: '#000000', backgroundColor: '#FFFFFF', rightBandText: 'RM' };
+    
+    // White plates with black text (default for most EU countries)
+    case 'D':   // Germany
+    case 'A':   // Austria (+ red stripes handled in LicensePlate)
+    case 'E':   // Spain
+    case 'PL':  // Poland
+    case 'CZ':  // Czech Republic
+    case 'SK':  // Slovakia
+    case 'H':   // Hungary
+    case 'RO':  // Romania
+    case 'BG':  // Bulgaria
+    case 'HR':  // Croatia
+    case 'SLO': // Slovenia
+    case 'GR':  // Greece
+    case 'DK':  // Denmark
+    case 'S':   // Sweden
+    case 'FIN': // Finland
+    case 'EST': // Estonia
+    case 'LV':  // Latvia
+    case 'LT':  // Lithuania
+    case 'IRL': // Ireland
+    case 'M':   // Malta
+    default:
+      return { fontColor: '#000000', backgroundColor: '#FFFFFF', rightBandText: '' };
+  }
+}
+
 const DEFAULT_CONFIG: GermanPlateConfig = {
-  cityCode: 'M',
-  letters: 'AB',
-  numbers: '1234',
+  cityCode: 'N',
+  letters: 'IK',
+  numbers: '745',
   suffix: '',
   showStatePlakette: true,
   showHUPlakette: true,
-  state: 'BY',
-  city: 'München',
-  huYear: CURRENT_YEAR + 2,
-  huMonth: 6,
+  state: 'NW',
+  city: 'Landeshauptstadt Düsseldorf',
+  huYear: 2027,
+  huMonth: 7,
   width: 'standard',
   plateStyle: 'normal',
   country: 'D',
   fontColor: '#000000',
   backgroundColor: '#FFFFFF',
-  plateText: '',
+  plateText: 'NIKLAS',
+  rightBandText: '',
 };
 
-// Parse config from URL search params
-function parseConfigFromURL(searchParams: URLSearchParams): GermanPlateConfig {
+// Parse config from URL hash
+function parseConfigFromHash(): GermanPlateConfig {
+  if (typeof window === 'undefined') return DEFAULT_CONFIG;
+  
+  const hash = window.location.hash.slice(1); // Remove leading #
+  const params = new URLSearchParams(hash);
+  
   return {
-    cityCode: searchParams.get('code') || DEFAULT_CONFIG.cityCode,
-    letters: searchParams.get('letters') || DEFAULT_CONFIG.letters,
-    numbers: searchParams.get('numbers') || DEFAULT_CONFIG.numbers,
-    suffix: (searchParams.get('suffix') as PlateSuffix) || DEFAULT_CONFIG.suffix,
-    showStatePlakette: searchParams.get('wappen') !== '0',
-    showHUPlakette: searchParams.get('hu') !== '0',
-    state: (searchParams.get('state') as GermanState) || DEFAULT_CONFIG.state,
-    city: searchParams.get('city') || DEFAULT_CONFIG.city,
-    huYear: parseInt(searchParams.get('huYear') || String(DEFAULT_CONFIG.huYear)),
-    huMonth: parseInt(searchParams.get('huMonth') || String(DEFAULT_CONFIG.huMonth)),
-    width: (searchParams.get('width') as PlateWidth) || DEFAULT_CONFIG.width,
-    plateStyle: (searchParams.get('style') as PlateStyle) || DEFAULT_CONFIG.plateStyle,
-    country: (searchParams.get('country') as EUCountry) || DEFAULT_CONFIG.country,
-    fontColor: searchParams.get('fontColor') || DEFAULT_CONFIG.fontColor,
-    backgroundColor: searchParams.get('bgColor') || DEFAULT_CONFIG.backgroundColor,
-    plateText: searchParams.get('text') || DEFAULT_CONFIG.plateText,
+    cityCode: params.get('code') || DEFAULT_CONFIG.cityCode,
+    letters: params.get('letters') || DEFAULT_CONFIG.letters,
+    numbers: params.get('numbers') || DEFAULT_CONFIG.numbers,
+    suffix: (params.get('suffix') as PlateSuffix) || DEFAULT_CONFIG.suffix,
+    showStatePlakette: params.get('wappen') !== '0',
+    showHUPlakette: params.get('hu') !== '0',
+    state: (params.get('state') as GermanState) || DEFAULT_CONFIG.state,
+    city: params.get('city') || DEFAULT_CONFIG.city,
+    huYear: parseInt(params.get('huYear') || String(DEFAULT_CONFIG.huYear)),
+    huMonth: parseInt(params.get('huMonth') || String(DEFAULT_CONFIG.huMonth)),
+    width: (params.get('width') as PlateWidth) || DEFAULT_CONFIG.width,
+    plateStyle: (params.get('style') as PlateStyle) || DEFAULT_CONFIG.plateStyle,
+    country: (params.get('country') as EUCountry) || DEFAULT_CONFIG.country,
+    fontColor: params.get('fontColor') || DEFAULT_CONFIG.fontColor,
+    backgroundColor: params.get('bgColor') || DEFAULT_CONFIG.backgroundColor,
+    plateText: params.get('text') || DEFAULT_CONFIG.plateText,
+    rightBandText: params.get('rightBand') || DEFAULT_CONFIG.rightBandText,
   };
 }
 
-// Generate URL search params from config
-function configToURLParams(config: GermanPlateConfig): string {
+// Generate URL hash from config
+function configToHash(config: GermanPlateConfig): string {
   const params = new URLSearchParams();
   params.set('code', config.cityCode);
   params.set('letters', config.letters);
@@ -69,23 +168,76 @@ function configToURLParams(config: GermanPlateConfig): string {
   if (config.fontColor !== '#000000') params.set('fontColor', config.fontColor);
   if (config.backgroundColor !== '#FFFFFF') params.set('bgColor', config.backgroundColor);
   if (config.plateText) params.set('text', config.plateText);
+  if (config.rightBandText) params.set('rightBand', config.rightBandText);
   return params.toString();
 }
 
 export default function PlateGenerator() {
   const { t, language, changeLanguage } = useTranslation();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [config, setConfig] = useState<GermanPlateConfig>(() => parseConfigFromURL(searchParams));
-  const [showGermanOptions, setShowGermanOptions] = useState(config.country === 'D');
+  const [config, setConfig] = useState<GermanPlateConfig>(DEFAULT_CONFIG);
+  const [showGermanOptions, setShowGermanOptions] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [plateTexture, setPlateTexture] = useState<string | null>(null);
+  const [show3DPreview, setShow3DPreview] = useState(false);
+  const [is3DEasterEgg, setIs3DEasterEgg] = useState(false);
   const plateRef = useRef<HTMLDivElement>(null);
 
-  // Update URL when config changes
+  // Check for 3D easter egg in hash
   useEffect(() => {
-    const newParams = configToURLParams(config);
-    const newURL = `?${newParams}`;
-    router.replace(newURL, { scroll: false });
-  }, [config, router]);
+    const checkEasterEgg = () => {
+      const hash = window.location.hash;
+      setIs3DEasterEgg(hash.includes('3d-render=true'));
+    };
+    checkEasterEgg();
+    window.addEventListener('hashchange', checkEasterEgg);
+    return () => window.removeEventListener('hashchange', checkEasterEgg);
+  }, []);
+
+  // Initialize from hash on mount (client-side only)
+  useEffect(() => {
+    const initialConfig = parseConfigFromHash();
+    setConfig(initialConfig);
+    setShowGermanOptions(initialConfig.country === 'D');
+    setIsInitialized(true);
+
+    // Listen for hash changes (e.g., browser back/forward)
+    const handleHashChange = () => {
+      const newConfig = parseConfigFromHash();
+      setConfig(newConfig);
+      setShowGermanOptions(newConfig.country === 'D');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Update hash when config changes
+  useEffect(() => {
+    if (!isInitialized) return;
+    const newHash = configToHash(config);
+    // Use replaceState to avoid polluting history on every keystroke
+    window.history.replaceState(null, '', `#${newHash}`);
+  }, [config, isInitialized]);
+
+  // Generate plate texture for 3D preview
+  useEffect(() => {
+    if (!plateRef.current || !show3DPreview) return;
+    
+    const generateTexture = async () => {
+      try {
+        const dataUrl = await htmlToImage.toPng(plateRef.current!, {
+          pixelRatio: 2,
+          cacheBust: true,
+        });
+        setPlateTexture(dataUrl);
+      } catch (error) {
+        console.error('Failed to generate plate texture:', error);
+      }
+    };
+    
+    // Debounce texture generation
+    const timeout = setTimeout(generateTexture, 300);
+    return () => clearTimeout(timeout);
+  }, [config, show3DPreview]);
 
   const handleChange = useCallback((field: keyof GermanPlateConfig, value: string | boolean | number) => {
     setConfig(prev => ({ ...prev, [field]: value }));
@@ -186,14 +338,21 @@ export default function PlateGenerator() {
                 value={config.country}
                 onChange={(e) => {
                   const newCountry = e.target.value as EUCountry;
-                  handleChange('country', newCountry);
+                  const countryDefaults = getCountryDefaults(newCountry);
+                  setConfig(prev => ({
+                    ...prev,
+                    country: newCountry,
+                    fontColor: countryDefaults.fontColor,
+                    backgroundColor: countryDefaults.backgroundColor,
+                    rightBandText: countryDefaults.rightBandText,
+                  }));
                   setShowGermanOptions(newCountry === 'D');
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
                 {Object.entries(EU_COUNTRY_NAMES).map(([code, name]) => (
                   <option key={code} value={code}>
-                    {name} ({code})
+                    {COUNTRY_FLAGS[code as EUCountry]} {name} ({code})
                   </option>
                 ))}
               </select>
@@ -211,6 +370,23 @@ export default function PlateGenerator() {
                   onChange={(e) => handleChange('plateText', e.target.value.toUpperCase())}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   placeholder="AB 123 CD"
+                />
+              </div>
+            )}
+
+            {/* Right band text - for France, Italy, Portugal */}
+            {['F', 'I', 'P'].includes(config.country) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {t.rightBandText || 'Region/Code'}
+                </label>
+                <input
+                  type="text"
+                  value={config.rightBandText}
+                  onChange={(e) => handleChange('rightBandText', e.target.value.toUpperCase().slice(0, 3))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  maxLength={3}
+                  placeholder={config.country === 'F' ? '75' : config.country === 'I' ? 'RM' : ''}
                 />
               </div>
             )}
@@ -292,8 +468,8 @@ export default function PlateGenerator() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
                 <option value="normal">{t.styleNormal}</option>
-                <option value="3d-black">{t.style3DBlack}</option>
-                <option value="3d-carbon">{t.style3DCarbon}</option>
+                <option value="3d-black-glossy">{t.style3DBlack}</option>
+                <option value="3d-carbon-glossy">{t.style3DCarbon}</option>
                 <option value="3d-black-matte">{t.style3DBlackMatte}</option>
                 <option value="3d-carbon-matte">{t.style3DCarbonMatte}</option>
               </select>
@@ -482,6 +658,35 @@ export default function PlateGenerator() {
             </div>
           </div>
         </div>
+
+        {/* 3D Car Preview Toggle - Easter Egg */}
+        {is3DEasterEgg && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              🚗 3D Preview
+            </h2>
+            <button
+              onClick={() => setShow3DPreview(!show3DPreview)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                show3DPreview 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              {show3DPreview ? 'Hide 3D' : 'Show 3D'}
+            </button>
+          </div>
+          {show3DPreview && (
+            <div className="relative">
+              <CarPreview3D plateTexture={plateTexture} />
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
+                🖱️ Drag to rotate • Scroll to zoom
+              </p>
+            </div>
+          )}
+          </div>
+        )}
 
         {/* Export Button */}
         <div className="text-center">

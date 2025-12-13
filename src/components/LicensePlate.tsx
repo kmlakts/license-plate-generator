@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef, useRef, useState, useLayoutEffect } from 'react';
+import React, { forwardRef, useRef, useState, useLayoutEffect, useEffect } from 'react';
 import { GermanPlateConfig, PlateStyle } from '@/types/plate';
 import EUBand from './EUBand';
 import StatePlakette from './StatePlakette';
@@ -20,24 +20,115 @@ function getPlateStyles(style: PlateStyle, scale: number) {
   
   const borderColor = '#000';
   
+  // Text shadow - glossy has inner edge highlights for embossed look
   const textShadow = is3D 
-    ? `
-      ${-1 * scale}px ${-1 * scale}px ${0}px rgba(255,255,255,0.8),
-      ${1 * scale}px ${1 * scale}px ${0}px rgba(0,0,0,0.4),
-      ${2 * scale}px ${2 * scale}px ${0}px rgba(0,0,0,0.3),
-      ${3 * scale}px ${3 * scale}px ${0}px rgba(0,0,0,0.2)
-    `
+    ? isGlossy
+      ? `
+        ${-1 * scale}px ${-1 * scale}px ${0}px rgba(255,255,255,0.6),
+        ${-0.5 * scale}px ${-0.5 * scale}px ${0}px rgba(255,255,255,0.4),
+        ${0.5 * scale}px ${0.5 * scale}px ${0}px rgba(0,0,0,0.3),
+        ${1 * scale}px ${1 * scale}px ${0}px rgba(0,0,0,0.4),
+        ${2 * scale}px ${2 * scale}px ${0}px rgba(0,0,0,0.3),
+        ${3 * scale}px ${3 * scale}px ${1 * scale}px rgba(0,0,0,0.2)
+      `
+      : `
+        ${1 * scale}px ${1 * scale}px ${0}px rgba(0,0,0,0.5),
+        ${2 * scale}px ${2 * scale}px ${0}px rgba(0,0,0,0.4),
+        ${3 * scale}px ${3 * scale}px ${0}px rgba(0,0,0,0.3)
+      `
     : 'none';
   
   return { borderColor, textShadow, is3D, isGlossy, isCarbon, isBlack };
 }
 
+// Country-specific plate features (visual elements, not colors - those come from config)
+function getCountryFeatures(country: string): { 
+  hasRedStripes: boolean;      // Austria
+  hasRightBand: boolean;       // France, Italy, Portugal
+  rightBandColor: string;      // Color for right band
+  rightBandTextColor: string;  // Text color for right band
+} {
+  const defaultFeatures = {
+    hasRedStripes: false,
+    hasRightBand: false,
+    rightBandColor: '#003399',
+    rightBandTextColor: '#FFFFFF',
+  };
+  
+  switch (country) {
+    case 'A': // Austria - has red stripes top and bottom
+      return { ...defaultFeatures, hasRedStripes: true };
+    case 'F': // France - has right blue band with region code
+      return { 
+        ...defaultFeatures, 
+        hasRightBand: true, 
+        rightBandColor: '#003399',
+        rightBandTextColor: '#FFFFFF',
+      };
+    case 'I': // Italy - has right blue band with region code
+      return { 
+        ...defaultFeatures, 
+        hasRightBand: true, 
+        rightBandColor: '#003399',
+        rightBandTextColor: '#FFFFFF',
+      };
+    case 'P': // Portugal - has right yellow band
+      return { 
+        ...defaultFeatures, 
+        hasRightBand: true, 
+        rightBandColor: '#FFD700',
+        rightBandTextColor: '#000000',
+      };
+    default:
+      return defaultFeatures;
+  }
+}
+
 const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
   ({ config, scale = 1 }, ref) => {
-    const { cityCode, letters, numbers, suffix, showStatePlakette, showHUPlakette, state, city, huYear, huMonth, width, plateStyle, country, fontColor, backgroundColor, plateText } = config;
+    const { cityCode, letters, numbers, suffix, showStatePlakette, showHUPlakette, state, city, huYear, huMonth, width, plateStyle, country, fontColor, backgroundColor, plateText, rightBandText } = config;
     
     const contentRef = useRef<HTMLDivElement>(null);
+    const plateRef = useRef<HTMLDivElement>(null);
     const [compressionRatio, setCompressionRatio] = useState(1);
+    const [fontLoaded, setFontLoaded] = useState(false);
+    const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+    const [isHovering, setIsHovering] = useState(false);
+
+    // Handle mouse move for 3D tilt effect
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!plateRef.current) return;
+      const rect = plateRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -15; // Max 15 degrees
+      const rotateY = ((x - centerX) / centerX) * 15; // Max 15 degrees
+      setTilt({ rotateX, rotateY });
+    };
+
+    const handleMouseEnter = () => setIsHovering(true);
+    const handleMouseLeave = () => {
+      setIsHovering(false);
+      setTilt({ rotateX: 0, rotateY: 0 });
+    };
+    
+    // Wait for EuroPlate font to load
+    useEffect(() => {
+      if (typeof document !== 'undefined' && document.fonts) {
+        document.fonts.ready.then(() => {
+          setFontLoaded(true);
+        });
+        // Also check if already loaded
+        document.fonts.load('105px EuroPlate').then(() => {
+          setFontLoaded(true);
+        });
+      } else {
+        // Fallback for browsers without font loading API
+        setTimeout(() => setFontLoaded(true), 100);
+      }
+    }, []);
     
     // Plate dimensions
     const plateHeight = 110 * scale;
@@ -47,29 +138,50 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
     const maxPlateWidth = width === 'standard' ? 520 * scale : calculateCompactWidth(config) * scale;
     const plateWidth = maxPlateWidth;
     
-    // Available width for content (after EU band, borders, and padding)
-    const availableWidth = plateWidth - euBandWidth - (borderWidth * 2) - (padding * 2);
-    
     const isGermany = country === 'D';
     const fontSize = 105 * scale;
     const styles = getPlateStyles(plateStyle, scale);
-    const textColor = fontColor || '#000000';
     
-    // Measure content and calculate compression after render
+    // Get country-specific features (visual elements, not colors)
+    const countryFeatures = getCountryFeatures(country);
+    // Colors come directly from config (set by PlateGenerator on country change)
+    const textColor = fontColor;
+    const plateBgColor = backgroundColor;
+    const redStripeHeight = 5 * scale;
+    
+    // Available width for content (after EU band, borders, padding, and right band if present)
+    const rightBandWidth = countryFeatures.hasRightBand ? euBandWidth : 0;
+    const availableWidth = plateWidth - euBandWidth - rightBandWidth - (borderWidth * 2) - (padding * 2);
+    
+    // Create a content key that changes when content changes - forces remeasurement
+    const contentKey = `${cityCode}-${letters}-${numbers}-${suffix}-${showStatePlakette}-${showHUPlakette}-${plateText}-${country}`;
+    
+    // Measure content and calculate compression after render AND after font loads
     useLayoutEffect(() => {
-      if (contentRef.current) {
-        // Reset scale to measure natural size
-        contentRef.current.style.transform = 'none';
-        const contentWidth = contentRef.current.scrollWidth;
+      if (contentRef.current && fontLoaded) {
+        // Directly manipulate transform for measurement to avoid React state timing issues
+        const el = contentRef.current;
+        const originalTransform = el.style.transform;
+        
+        // Remove transform to measure natural width
+        el.style.transform = 'none';
+        
+        // Force synchronous reflow
+        void el.offsetWidth;
+        const contentWidth = el.scrollWidth;
         
         if (contentWidth > availableWidth) {
           const ratio = availableWidth / contentWidth;
-          setCompressionRatio(Math.max(0.65, ratio)); // Don't compress below 65%
+          const newRatio = Math.max(0.65, ratio);
+          setCompressionRatio(newRatio);
+          // Apply immediately to avoid flash
+          el.style.transform = `scaleX(${newRatio})`;
         } else {
           setCompressionRatio(1);
+          el.style.transform = originalTransform;
         }
       }
-    }, [cityCode, letters, numbers, suffix, showStatePlakette, showHUPlakette, plateText, availableWidth, scale]);
+    }, [contentKey, availableWidth, scale, fontLoaded]);
     
     const baseTextStyle: React.CSSProperties = {
       fontSize: `${fontSize}px`,
@@ -78,32 +190,58 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
       whiteSpace: 'nowrap',
     };
     
+    // Carbon fiber pattern - diagonal stripes
+    const stripeWidth = 2 * scale;
+    
     const textStyle: React.CSSProperties = styles.isCarbon 
       ? {
           ...baseTextStyle,
           color: 'transparent',
-          backgroundImage: `
-            repeating-linear-gradient(0deg, #222 0px, #222 ${2 * scale}px, #333 ${2 * scale}px, #333 ${4 * scale}px),
-            repeating-linear-gradient(90deg, #1a1a1a 0px, #1a1a1a ${2 * scale}px, #2a2a2a ${2 * scale}px, #2a2a2a ${4 * scale}px)
-          `,
-          backgroundBlendMode: 'multiply',
+          backgroundImage: styles.isGlossy 
+            ? `
+              linear-gradient(
+                150deg,
+                rgba(255,255,255,0.5) 0%,
+                rgba(255,255,255,0.2) 20%,
+                transparent 40%,
+                transparent 60%,
+                rgba(255,255,255,0.15) 80%,
+                rgba(255,255,255,0.35) 100%
+              ),
+              repeating-linear-gradient(
+                -45deg,
+                #222 0px,
+                #222 ${stripeWidth}px,
+                #444 ${stripeWidth}px,
+                #444 ${stripeWidth * 2}px,
+                #222 ${stripeWidth * 2}px,
+                #222 ${stripeWidth * 3}px,
+                #333 ${stripeWidth * 3}px,
+                #333 ${stripeWidth * 4}px
+              )
+            `
+            : `
+              repeating-linear-gradient(
+                -45deg,
+                #0a0a0a 0px,
+                #0a0a0a ${stripeWidth}px,
+                #1a1a1a ${stripeWidth}px,
+                #1a1a1a ${stripeWidth * 2}px,
+                #0a0a0a ${stripeWidth * 2}px,
+                #0a0a0a ${stripeWidth * 3}px,
+                #151515 ${stripeWidth * 3}px,
+                #151515 ${stripeWidth * 4}px
+              )
+            `,
           backgroundClip: 'text',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          textShadow: `${1 * scale}px ${1 * scale}px 0 rgba(0,0,0,0.6), ${-0.5 * scale}px ${-0.5 * scale}px 0 rgba(100,100,100,0.5)`,
-          filter: styles.isGlossy ? 'brightness(1.1)' : 'none',
+          filter: `drop-shadow(${1 * scale}px ${1 * scale}px 0 rgba(80,80,80,0.5)) drop-shadow(${-0.5 * scale}px ${-0.5 * scale}px 0 rgba(0,0,0,0.8))`,
         }
       : {
           ...baseTextStyle,
           color: textColor,
           textShadow: styles.textShadow,
-          ...(styles.isGlossy && {
-            backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 40%, transparent 50%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            backgroundSize: '100% 200%',
-            backgroundPosition: 'top',
-          }),
         };
     
     const whiteBorderWidth = styles.is3D ? 0 : 1.5 * scale;
@@ -112,40 +250,105 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
       <div
         ref={ref}
         style={{
+          perspective: '1000px',
           display: 'inline-block',
-          padding: `${whiteBorderWidth}px`,
-          backgroundColor: styles.is3D ? 'transparent' : '#fff',
-          borderRadius: `${10 * scale}px`,
           flexShrink: 0,
           flexGrow: 0,
         }}
       >
         <div
+          ref={plateRef}
+          onMouseMove={handleMouseMove}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            width: `${plateWidth}px`,
-            height: `${plateHeight}px`,
-            backgroundColor: backgroundColor || '#FFFFFF',
-            border: `${borderWidth}px solid ${styles.borderColor}`,
-            borderRadius: `${8 * scale}px`,
-            overflow: 'hidden',
-            fontFamily: 'EuroPlate, sans-serif',
-            boxShadow: styles.is3D 
-              ? `inset ${2 * scale}px ${2 * scale}px ${4 * scale}px rgba(255,255,255,0.5), inset ${-1 * scale}px ${-1 * scale}px ${3 * scale}px rgba(0,0,0,0.15)` 
+            display: 'inline-block',
+            padding: `${whiteBorderWidth}px`,
+            backgroundColor: styles.is3D ? 'transparent' : '#fff',
+            borderRadius: `${10 * scale}px`,
+            transform: `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`,
+            transition: isHovering ? 'transform 0.1s ease-out' : 'transform 0.4s ease-out',
+            transformStyle: 'preserve-3d',
+            boxShadow: isHovering 
+              ? `${-tilt.rotateY * 2}px ${tilt.rotateX * 2}px ${20 * scale}px rgba(0,0,0,0.3)`
               : 'none',
           }}
         >
+          <div
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              width: `${plateWidth}px`,
+              height: `${plateHeight}px`,
+              backgroundColor: plateBgColor,
+              border: `${borderWidth}px solid ${styles.borderColor}`,
+              borderRadius: `${8 * scale}px`,
+              overflow: 'hidden',
+              fontFamily: 'EuroPlate, sans-serif',
+              boxShadow: styles.is3D 
+                ? `inset ${2 * scale}px ${2 * scale}px ${4 * scale}px rgba(255,255,255,0.5), inset ${-1 * scale}px ${-1 * scale}px ${3 * scale}px rgba(0,0,0,0.15)` 
+                : 'none',
+            }}
+          >
+          {/* Austrian red stripes */}
+          {countryFeatures.hasRedStripes && (
+            <>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: `${euBandWidth}px`,
+                right: 0,
+                height: `${redStripeHeight}px`,
+                backgroundColor: '#C8102E',
+                zIndex: 1,
+              }} />
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: `${euBandWidth}px`,
+                right: 0,
+                height: `${redStripeHeight}px`,
+                backgroundColor: '#C8102E',
+                zIndex: 1,
+              }} />
+            </>
+          )}
+          
           {/* EU Band - fixed position */}
           <EUBand scale={scale} countryCode={country} />
+          
+          {/* Right band for France, Italy, Portugal */}
+          {countryFeatures.hasRightBand && (
+            <div style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: `${euBandWidth}px`,
+              backgroundColor: countryFeatures.rightBandColor,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: countryFeatures.rightBandTextColor,
+              fontSize: `${14 * scale}px`,
+              fontFamily: 'Arial, sans-serif',
+              fontWeight: 'bold',
+              zIndex: 2,
+            }}>
+              {rightBandText && (
+                <span>{rightBandText}</span>
+              )}
+            </div>
+          )}
           
           {/* Content area - fixed width, centered content */}
           <div 
             style={{ 
               position: 'absolute',
               left: `${euBandWidth}px`,
-              right: 0,
+              right: countryFeatures.hasRightBand ? `${euBandWidth}px` : 0,
               top: 0,
               bottom: 0,
               display: 'flex',
@@ -183,9 +386,11 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
                         transform: compressionRatio < 1 ? `scaleX(${1 / compressionRatio})` : undefined,
                       }}
                     >
-                      {showHUPlakette && (
+                      {/* HU Plakette (top) - use visibility to keep space */}
+                      <div style={{ visibility: showHUPlakette ? 'visible' : 'hidden', height: showHUPlakette || showStatePlakette ? undefined : 0 }}>
                         <HUPlakette year={huYear} month={huMonth} scale={scale * 0.85} />
-                      )}
+                      </div>
+                      {/* State Plakette (bottom) */}
                       {showStatePlakette && (
                         <StatePlakette state={state} city={city} scale={scale * 1.0} />
                       )}
@@ -200,6 +405,7 @@ const LicensePlate = forwardRef<HTMLDivElement, LicensePlateProps>(
               )}
             </div>
           </div>
+        </div>
         </div>
       </div>
     );

@@ -13,6 +13,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400..700&display=swap" rel="stylesheet" />
+      </head>
       <body className="antialiased flex flex-col min-h-screen">
         <main className="flex-1">
           {children}
@@ -29,6 +34,16 @@ export default function RootLayout({
               Wikimedia Commons
             </a>
             {' '}• Lizenziert unter Public Domain / CC-BY-SA
+          </p>
+          <p className="mt-2">
+            <a 
+              href="https://github.com/niklaswa" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              GitHub
+            </a>
           </p>
         </footer>
       </body>

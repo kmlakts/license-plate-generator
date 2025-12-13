@@ -78,6 +78,7 @@ export interface PlateConfig {
   fontColor: string;       // Hex color for text
   backgroundColor: string; // Hex color for plate background
   plateText: string;       // Generic plate text for non-German plates
+  rightBandText: string;   // Text for right band (France, Italy, Portugal)
   
   // German-specific settings
   cityCode: string;        // e.g., "M", "B", "HH"

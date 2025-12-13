@@ -41,6 +41,7 @@ export interface Translations {
   plateText: string;
   fontColor: string;
   backgroundColor: string;
+  rightBandText: string;
   
   // Plate widths
   widthStandard: string;
@@ -87,6 +88,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Kennzeichentext',
     fontColor: 'Schriftfarbe',
     backgroundColor: 'Hintergrundfarbe',
+    rightBandText: 'Region/Code',
     widthStandard: 'Standard (520mm)',
     widthCompact: 'Kompakt',
     styleNormal: 'Normal (weiß)',
@@ -119,6 +121,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Plate Text',
     fontColor: 'Font Color',
     backgroundColor: 'Background Color',
+    rightBandText: 'Region/Code',
     widthStandard: 'Standard (520mm)',
     widthCompact: 'Compact',
     styleNormal: 'Normal (white)',
@@ -151,6 +154,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Texte plaque',
     fontColor: 'Couleur police',
     backgroundColor: 'Couleur fond',
+    rightBandText: 'Région/Code',
     widthStandard: 'Standard (520mm)',
     widthCompact: 'Compact',
     styleNormal: 'Normal (blanc)',
@@ -183,6 +187,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Texto matrícula',
     fontColor: 'Color fuente',
     backgroundColor: 'Color fondo',
+    rightBandText: 'Región/Código',
     widthStandard: 'Estándar (520mm)',
     widthCompact: 'Compacto',
     styleNormal: 'Normal (blanco)',
@@ -215,6 +220,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Testo targa',
     fontColor: 'Colore carattere',
     backgroundColor: 'Colore sfondo',
+    rightBandText: 'Regione/Codice',
     widthStandard: 'Standard (520mm)',
     widthCompact: 'Compatto',
     styleNormal: 'Normale (bianco)',
@@ -247,6 +253,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Kentekentekst',
     fontColor: 'Letterkleur',
     backgroundColor: 'Achtergrondkleur',
+    rightBandText: 'Regio/Code',
     widthStandard: 'Standaard (520mm)',
     widthCompact: 'Compact',
     styleNormal: 'Normaal (wit)',
@@ -279,6 +286,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Tekst tablicy',
     fontColor: 'Kolor czcionki',
     backgroundColor: 'Kolor tła',
+    rightBandText: 'Region/Kod',
     widthStandard: 'Standardowa (520mm)',
     widthCompact: 'Kompaktowa',
     styleNormal: 'Normalna (biała)',
@@ -311,6 +319,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Texto matrícula',
     fontColor: 'Cor da fonte',
     backgroundColor: 'Cor de fundo',
+    rightBandText: 'Região/Código',
     widthStandard: 'Padrão (520mm)',
     widthCompact: 'Compacto',
     styleNormal: 'Normal (branco)',
@@ -343,6 +352,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Skylttext',
     fontColor: 'Textfärg',
     backgroundColor: 'Bakgrundsfärg',
+    rightBandText: 'Region/Kod',
     widthStandard: 'Standard (520mm)',
     widthCompact: 'Kompakt',
     styleNormal: 'Normal (vit)',
@@ -375,6 +385,7 @@ const translations: Record<Language, Translations> = {
     plateText: 'Text SPZ',
     fontColor: 'Barva písma',
     backgroundColor: 'Barva pozadí',
+    rightBandText: 'Region/Kód',
     widthStandard: 'Standardní (520mm)',
     widthCompact: 'Kompaktní',
     styleNormal: 'Normální (bílá)',

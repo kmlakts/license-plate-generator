@@ -95,17 +95,21 @@ export default function StatePlakette({ state, city = '', scale = 1 }: StatePlak
           </pattern>
           {/* Radial security lines */}
           <pattern id={`radialSecurity-${state}`} patternUnits="userSpaceOnUse" width="100" height="100">
-            {[...Array(36)].map((_, i) => (
-              <line
-                key={i}
-                x1="50"
-                y1="50"
-                x2={50 + 50 * Math.cos((i * 10 * Math.PI) / 180)}
-                y2={50 + 50 * Math.sin((i * 10 * Math.PI) / 180)}
-                stroke="#e0e0e0"
-                strokeWidth="0.3"
-              />
-            ))}
+            {[...Array(36)].map((_, i) => {
+              const x2 = Math.round((50 + 50 * Math.cos((i * 10 * Math.PI) / 180)) * 1000) / 1000;
+              const y2 = Math.round((50 + 50 * Math.sin((i * 10 * Math.PI) / 180)) * 1000) / 1000;
+              return (
+                <line
+                  key={i}
+                  x1="50"
+                  y1="50"
+                  x2={x2}
+                  y2={y2}
+                  stroke="#e0e0e0"
+                  strokeWidth="0.3"
+                />
+              );
+            })}
           </pattern>
         </defs>
         
