@@ -21,7 +21,7 @@ export default function SlovakCoatOfArms({ scale = 1 }: SlovakCoatOfArmsProps) {
       }}
     >
       <img
-        src="/wappen/sk.svg"
+        src="/coa/sk.svg"
         alt="Slovak coat of arms"
         style={{
           width: '100%',

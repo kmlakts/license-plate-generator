@@ -35,7 +35,7 @@ export default function StatePlakette({ state, city = '', scale = 1, isHovering 
   const size = 42 * scale;
   
   // Get image path and names for German states
-  const imagePath = `/wappen/de/${STATE_IMAGE_MAP[state]}.svg`;
+  const imagePath = `/coa/de/${STATE_IMAGE_MAP[state]}.svg`;
   const cityText = city.toUpperCase();
   const stateName = STATE_NAMES[state].toUpperCase();
   

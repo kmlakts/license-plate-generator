@@ -24,7 +24,7 @@ export default function SwissCantonPlakette({ canton, scale = 1 }: SwissCantonPl
       }}
     >
       <Image
-        src={`/wappen/ch/${canton}.svg`}
+        src={`/coa/ch/${canton}.svg`}
         alt={`Wappen ${canton}`}
         width={size}
         height={size}

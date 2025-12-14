@@ -23,7 +23,7 @@ export default function SwissCoatOfArms({ scale = 1 }: SwissCoatOfArmsProps) {
       }}
     >
       <Image
-        src="/wappen/ch/CH.svg"
+        src="/coa/ch/CH.svg"
         alt="Schweizer Wappen"
         width={size}
         height={size}

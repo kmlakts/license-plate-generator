@@ -130,7 +130,7 @@ const BundeswehrPlakette: React.FC<BundeswehrPlaketteProps> = ({ scale = 1, isHo
         
         {/* Bundesadler in center */}
         <image
-          href="/wappen/bundesadler.svg"
+          href="/coa/bundesadler.svg"
           x="25"
           y="25"
           width="50"

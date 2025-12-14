@@ -17,7 +17,7 @@ export default function AustrianStatePlakette({ state, scale = 1 }: AustrianStat
     return null;
   }
   
-  const imagePath = `/wappen/at/${state}.svg`;
+  const imagePath = `/coa/at/${state}.svg`;
   const stateName = AUSTRIAN_STATE_NAMES[state].toUpperCase();
   
   // Calculate compression based on text length
