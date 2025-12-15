@@ -81,13 +81,6 @@ function getCountryFeatures(country: string): {
         rightBandColor: '#003399',
         rightBandTextColor: '#FFFFFF',
       };
-    case 'P': // Portugal - has right yellow band
-      return { 
-        ...defaultFeatures, 
-        hasRightBand: true, 
-        rightBandColor: '#FFD700',
-        rightBandTextColor: '#000000',
-      };
     default:
       return defaultFeatures;
   }

@@ -65,10 +65,6 @@ function getCountryDefaults(country: Country): { fontColor: string; backgroundCo
     case 'B': // Belgium - white with red text
       return { fontColor: '#C8102E', backgroundColor: '#FFFFFF', rightBandText: '' };
     
-    // Blue text plates
-    case 'P': // Portugal - white with blue text + right band
-      return { fontColor: '#003399', backgroundColor: '#FFFFFF', rightBandText: '' };
-    
     // Countries with right band
     case 'F': // France - right band with region code
       return { fontColor: '#000000', backgroundColor: '#FFFFFF', rightBandText: '75' };
